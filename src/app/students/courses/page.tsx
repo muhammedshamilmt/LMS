@@ -17,7 +17,7 @@ export default function CoursePage() {
       <div className={`flex-1 flex flex-col w-full transition-all duration-300 ${isFiltersOpen ? 'pr-0' : 'pr-10'}`}>
         {/* Header section */}
         <div className="flex flex-col items-center text-center mt-6 mb-12">
-          <h2 className="text-[42px] font-bold text-gray-900 mb-4 tracking-tight">Level up your skills</h2>
+          <h2 className="text-[42px] font-bold dark:text-white text-gray-900 mb-4 tracking-tight">Level up your skills</h2>
           <p className="text-gray-500 max-w-lg mb-8 text-[15px]">
             Explore top courses, learn from industry experts, and build job-ready skills for your future!
           </p>
@@ -44,14 +44,14 @@ export default function CoursePage() {
               )}
             </div>
 
-            <Button className="rounded-full px-8 py-6 font-semibold bg-black hover:bg-black/90 text-white text-[15px]">
+            <Button className="rounded-full px-8 py-6 font-semibold dark:bg-white bg-black hover:bg-black/90 dark:text-black text-[15px]">
               Search
             </Button>
           </div>
         </div>
 
         {/* Courses Grid */}
-        <div className="p-6 md:p-8 bg-gray-50/50 rounded-[40px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-[1800px] mx-auto w-full">
+        <div className="p-6 md:p-8 dark:bg-black rounded-[40px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-[1800px] mx-auto w-full">
           <CourseCard id="1"
             topBadge="Start: 20 May"
             category="Design"
