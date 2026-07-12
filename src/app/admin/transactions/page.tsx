@@ -419,7 +419,7 @@ export default function TransactionsPage() {
             onClick={() => setSelectedTx(null)}
           />
           {/* Sidebar */}
-          <div className="fixed top-0 right-0 h-full w-[400px] max-w-full rounded-l-2xl bg-[#f3f3f3] dark:bg-zinc-950 z-50 shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col border-l border-gray-200 dark:border-zinc-800">
+          <div className="fixed top-0 right-0 h-full w-[400px] max-w-full rounded-l-2xl bg-[#ffffff] dark:bg-zinc-950 z-50 shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col border-l border-gray-200 dark:border-zinc-800">
             <div className="p-6 flex-1 overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold">Payment Details</h2>
