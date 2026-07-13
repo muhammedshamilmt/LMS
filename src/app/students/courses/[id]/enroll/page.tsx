@@ -104,7 +104,7 @@ export default function CourseEnrollPage({ params }: { params: Promise<{ id: str
           <div className="relative w-full aspect-[16/10] sm:aspect-video rounded-[32px] overflow-visible mb-12 shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-gray-100 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800">
             {/* The main thumbnail image */}
             <img
-              src="https://images.unsplash.com/photo-1633511090164-b49daed0273c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSV_idILmOBQ7fSJVY1j7Kncw8M5LiQi5Uk-C5CSSyi0A&s=10"
               alt="Course Thumbnail"
               className="w-full h-full object-cover rounded-[32px]"
             />
@@ -113,7 +113,7 @@ export default function CourseEnrollPage({ params }: { params: Promise<{ id: str
             <div className="absolute -bottom-8 left-6 md:left-10 bg-white dark:bg-[#0a0a0a] p-1 rounded-[20px]  border border-gray-100/50 dark:border-zinc-800/50">
               <div className="w-16 h-16 md:w-20 md:h-20 rounded-[16px] overflow-hidden bg-gray-200 dark:bg-zinc-800">
                 <img
-                  src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSV_idILmOBQ7fSJVY1j7Kncw8M5LiQi5Uk-C5CSSyi0A&s=10"
                   alt="Instructor"
                   className="w-full h-full object-cover"
                 />

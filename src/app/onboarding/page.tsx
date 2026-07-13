@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   GraduationCap,
@@ -64,13 +64,13 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 dark:bg-[#0a0a0a] flex overflow-hidden">
+    <div className="min-h-screen w-full bg-blue-600 gap-1 dark:bg-[#0a0a0a] p-2 flex overflow-hidden">
       {/* Left Column: Form Section */}
       <motion.div
         initial={false}
         animate={{ width: currentStep === "success" ? "100%" : "45%" }}
         transition={{ type: "spring", bounce: 0, duration: 0.8 }}
-        className="w-full flex flex-col justify-between px-8 sm:px-16 md:px-24 py-12 relative z-10"
+        className="w-full flex flex-col bg-white justify-between rounded-3xl px-8 sm:px-16 md:px-24 py-12 relative z-10"
       >
 
         {/* Header / Logo */}
@@ -150,7 +150,7 @@ export default function OnboardingPage() {
             initial={false}
             exit={{ width: 0, opacity: 0 }}
             transition={{ type: "spring", bounce: 0, duration: 0.8 }}
-            className="hidden lg:flex w-[55%] bg-[#254ee8] relative items-center justify-center p-12 overflow-hidden"
+            className="hidden lg:flex w-[55%] bg-[#254ee8] rounded-4xl relative items-center justify-center p-12 overflow-hidden"
           >
             {/* Background Grid */}
             <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
@@ -348,6 +348,15 @@ function StepNationality({ value, onChange }: { value: string, onChange: (val: s
 }
 
 function StepSuccess() {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 2500); // Trigger success just before the button appears
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <motion.div variants={slideVariants} initial="hidden" animate="visible" exit="exit" transition={{ duration: 0.4 }} className="text-center absolute inset-0 flex flex-col items-center justify-center pt-10">
 
@@ -357,8 +366,16 @@ function StepSuccess() {
       </div>
 
       <div className="flex items-center justify-center gap-3 mb-6">
-        <Loader2 className="w-8 h-8 text-gray-900 dark:text-white animate-spin" />
-        <h2 className="text-4xl font-bold text-gray-900 dark:text-white">Your workspace is getting ready...</h2>
+        {isLoaded ? (
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", bounce: 0.5 }}>
+            <CheckCircle2 className="w-8 h-8 text-green-500" />
+          </motion.div>
+        ) : (
+          <Loader2 className="w-8 h-8 text-gray-900 dark:text-white animate-spin" />
+        )}
+        <h2 className="text-4xl font-bold text-gray-900 dark:text-white">
+          {isLoaded ? "Workspace is ready!" : "Your workspace is getting ready..."}
+        </h2>
       </div>
 
       <p className="text-gray-600 dark:text-zinc-400 text-lg max-w-lg mx-auto mb-10">

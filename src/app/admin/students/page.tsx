@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Search, Filter, Download, Plus, ChevronLeft, ChevronRight, LayoutGrid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Link from 'next/link';
 
 const DUMMY_STUDENTS = [
   { id: '1', name: 'Jenny Wilson', email: 'jenny.w@example.com', lastActive: 'Sep 12 at 09:10 AM', status: 'Active', created: '1 month ago', platform: 'Web', avatar: 'https://i.pravatar.cc/150?u=1' },
@@ -38,7 +39,7 @@ export default function StudentsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-zinc-100">Students</h1>
-        
+
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-zinc-500" />
           <input
@@ -51,18 +52,18 @@ export default function StudentsPage() {
 
       {/* Table Container */}
       <div className="flex flex-col bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/10 rounded-3xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_10px_20px_rgba(0,0,0,0.03)] dark:shadow-none">
-        
+
         {/* Table Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-4 p-6 border-b border-gray-100 dark:border-white/5">
           <div className="flex items-center bg-gray-100 dark:bg-white/5 p-1 rounded-full">
-            <button 
+            <button
               onClick={() => setView('list')}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-colors ${view === 'list' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-zinc-100 shadow-sm' : 'text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100'}`}
             >
               <List className="w-4 h-4" />
               List
             </button>
-            <button 
+            <button
               onClick={() => setView('grid')}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-colors ${view === 'grid' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-zinc-100 shadow-sm' : 'text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100'}`}
             >
@@ -80,10 +81,12 @@ export default function StudentsPage() {
               <Download className="w-4 h-4" />
               Export
             </Button>
-            <Button className="gap-2 rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-gray-200 border-0 transition-colors">
-              <Plus className="w-5 h-5" />
-              Add New Student
-            </Button>
+            <Link href="/admin/students/new">
+              <Button className="gap-2 rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-gray-200 border-0 transition-colors">
+                <Plus className="w-5 h-5" />
+                Add New Student
+              </Button>
+            </Link>
           </div>
         </div>
 
@@ -108,32 +111,40 @@ export default function StudentsPage() {
               </thead>
               <tbody>
                 {DUMMY_STUDENTS.map((student) => (
-                  <tr key={student.id} className="border-b border-gray-50 dark:border-white/5 last:border-0 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                  <tr key={student.id} className="border-b border-gray-50 dark:border-white/5 last:border-0 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <input type="checkbox" className="rounded border-gray-300 dark:border-white/20 bg-transparent" />
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={student.avatar} />
-                          <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium text-gray-900 dark:text-zinc-100">{student.name}</span>
+                        <input type="checkbox" className="rounded border-gray-300 dark:border-white/20 bg-transparent" onClick={(e) => e.stopPropagation()} />
+                        <Link href={`/admin/students/${student.id}`} className="flex items-center gap-3">
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={student.avatar} />
+                            <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium text-gray-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{student.name}</span>
+                        </Link>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-500 dark:text-zinc-400">{student.email}</td>
+                    <td className="px-6 py-4 text-gray-500 dark:text-zinc-400"><Link href={`/admin/students/${student.id}`}>{student.email}</Link></td>
                     <td className="px-6 py-4 text-gray-500 dark:text-zinc-400">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-zinc-600" />
-                        {student.lastActive}
-                      </div>
+                      <Link href={`/admin/students/${student.id}`}>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-zinc-600" />
+                          {student.lastActive}
+                        </div>
+                      </Link>
                     </td>
                     <td className="px-6 py-4">
-                      <StatusBadge status={student.status} />
+                      <Link href={`/admin/students/${student.id}`}>
+                        <StatusBadge status={student.status} />
+                      </Link>
                     </td>
-                    <td className="px-6 py-4 text-gray-500 dark:text-zinc-400">{student.created}</td>
+                    <td className="px-6 py-4 text-gray-500 dark:text-zinc-400"><Link href={`/admin/students/${student.id}`}>{student.created}</Link></td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-zinc-300 rounded-md border border-gray-200 dark:border-white/10">
-                        {student.platform}
-                      </span>
+                      <Link href={`/admin/students/${student.id}`}>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-zinc-300 rounded-md border border-gray-200 dark:border-white/10">
+                          {student.platform}
+                        </span>
+                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -143,19 +154,19 @@ export default function StudentsPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
             {DUMMY_STUDENTS.map((student) => (
-              <div key={student.id} className="flex flex-col items-center justify-center p-6 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/10 rounded-3xl hover:border-gray-200 dark:hover:border-white/20 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)] dark:shadow-none group">
-                <Avatar className="w-20 h-20 mb-4 ring-4 ring-gray-50 dark:ring-white/5 transition-all group-hover:ring-gray-100 dark:group-hover:ring-white/10">
+              <Link href={`/admin/students/${student.id}`} key={student.id} className="flex flex-col items-center justify-center p-6 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/10 rounded-3xl hover:border-blue-200 dark:hover:border-blue-500/30 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)] dark:shadow-none group cursor-pointer">
+                <Avatar className="w-20 h-20 mb-4 ring-4 ring-gray-50 dark:ring-white/5 transition-all group-hover:ring-blue-50 dark:group-hover:ring-blue-500/10">
                   <AvatarImage src={student.avatar} />
                   <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <h3 className="font-semibold text-lg text-gray-900 dark:text-zinc-100">{student.name}</h3>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{student.name}</h3>
                 <p className="text-sm text-gray-500 dark:text-zinc-400 mb-5">{student.email}</p>
                 <StatusBadge status={student.status} />
                 <div className="flex items-center gap-2 mt-5 text-xs font-medium text-gray-500 dark:text-zinc-500 bg-gray-50 dark:bg-white/5 px-3 py-1.5 rounded-full">
                   <span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-zinc-600" />
                   {student.lastActive}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
