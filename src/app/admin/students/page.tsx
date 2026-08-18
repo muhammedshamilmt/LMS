@@ -1,21 +1,48 @@
 "use client";
 
 import React, { useState } from 'react';
+import useSWR from 'swr';
 import { Search, Filter, Download, Plus, ChevronLeft, ChevronRight, LayoutGrid, List } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Image as IKImage } from "@imagekit/next";
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
+import { fetcher } from '@/lib/fetcher';
+import { Button } from '@/components/ui/button';
 
-const DUMMY_STUDENTS = [
-  { id: '1', name: 'Jenny Wilson', email: 'jenny.w@example.com', lastActive: 'Sep 12 at 09:10 AM', status: 'Active', created: '1 month ago', platform: 'Web', avatar: 'https://i.pravatar.cc/150?u=1' },
-  { id: '2', name: 'David Lane', email: 'david.l@example.com', lastActive: 'Sep 12 at 10:15 AM', status: 'Inactive', created: '2 months ago', platform: 'App', avatar: 'https://i.pravatar.cc/150?u=2' },
-  { id: '3', name: 'Michael Smith', email: 'michael.s@example.com', lastActive: 'Sep 12 at 11:20 AM', status: 'Pending', created: '3 months ago', platform: 'Web', avatar: 'https://i.pravatar.cc/150?u=3' },
-  { id: '4', name: 'Chris Lee', email: 'chris.l@example.com', lastActive: 'Sep 12 at 12:25 PM', status: 'Active', created: '4 months ago', platform: 'Web', avatar: 'https://i.pravatar.cc/150?u=4' },
-  { id: '5', name: 'Emily Johnson', email: 'emily.j@example.com', lastActive: 'Sep 12 at 01:30 PM', status: 'Inactive', created: '5 months ago', platform: 'App', avatar: 'https://i.pravatar.cc/150?u=5' },
-  { id: '6', name: 'Steven Davis', email: 'steven.d@example.com', lastActive: 'Sep 12 at 02:35 PM', status: 'Pending', created: '6 months ago', platform: 'Web', avatar: 'https://i.pravatar.cc/150?u=6' },
-  { id: '7', name: 'Alex Jaka', email: 'alex.j@example.com', lastActive: 'Sep 12 at 03:40 PM', status: 'Active', created: '7 months ago', platform: 'App', avatar: 'https://i.pravatar.cc/150?u=7' },
-  { id: '8', name: 'James Brown', email: 'james.b@example.com', lastActive: 'Sep 12 at 04:45 PM', status: 'Inactive', created: '8 months ago', platform: 'Web', avatar: 'https://i.pravatar.cc/150?u=8' },
-];
+const StudentSkeletonGrid = () => (
+  <>
+    {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+      <div key={i} className="flex flex-col items-center justify-center p-6 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/10 rounded-3xl animate-pulse">
+        <div className="w-20 h-20 bg-gray-200 dark:bg-zinc-800 rounded-full mb-4"></div>
+        <div className="h-5 w-32 bg-gray-200 dark:bg-zinc-800 rounded mb-2"></div>
+        <div className="h-4 w-40 bg-gray-100 dark:bg-zinc-800/50 rounded mb-5"></div>
+        <div className="h-6 w-20 bg-gray-200 dark:bg-zinc-800 rounded-full"></div>
+      </div>
+    ))}
+  </>
+);
+
+const StudentSkeletonList = () => (
+  <>
+    {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+      <tr key={i} className="border-b border-gray-50 dark:border-white/5 animate-pulse">
+        <td className="px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-4 h-4 bg-gray-200 dark:bg-zinc-800 rounded"></div>
+            <div className="w-8 h-8 bg-gray-200 dark:bg-zinc-800 rounded-full"></div>
+            <div className="h-4 w-32 bg-gray-200 dark:bg-zinc-800 rounded"></div>
+          </div>
+        </td>
+        <td className="px-6 py-4"><div className="h-4 w-40 bg-gray-100 dark:bg-zinc-800/50 rounded"></div></td>
+        <td className="px-6 py-4"><div className="h-4 w-24 bg-gray-100 dark:bg-zinc-800/50 rounded"></div></td>
+        <td className="px-6 py-4"><div className="h-6 w-16 bg-gray-200 dark:bg-zinc-800 rounded-full"></div></td>
+        <td className="px-6 py-4"><div className="h-4 w-24 bg-gray-100 dark:bg-zinc-800/50 rounded"></div></td>
+        <td className="px-6 py-4"><div className="h-6 w-16 bg-gray-200 dark:bg-zinc-800 rounded"></div></td>
+      </tr>
+    ))}
+  </>
+);
 
 const StatusBadge = ({ status }: { status: string }) => {
   const styles = {
@@ -31,8 +58,35 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
+type Student = {
+  id: string;
+  name: string;
+  email: string;
+  lastActive: string;
+  status: string;
+  created: string;
+  platform: string;
+  avatar: string;
+};
+
 export default function StudentsPage() {
   const [view, setView] = useState<'list' | 'grid'>('list');
+
+  const { data: rawStudents, error, isLoading } = useSWR(['users', { order: { column: 'created_at', ascending: false } }], fetcher);
+
+  const students: Student[] = React.useMemo(() => {
+    if (!rawStudents) return [];
+    return rawStudents.map((u: any) => ({
+      id: u.id,
+      name: u.full_name || 'Unknown',
+      email: u.email || 'No Email',
+      lastActive: new Date(u.created_at).toLocaleDateString(),
+      status: u.status || 'Active',
+      created: new Date(u.created_at).toLocaleDateString(),
+      platform: 'Web',
+      avatar: u.avatar_url || ''
+    }));
+  }, [rawStudents]);
 
   return (
     <div className="w-full">
@@ -110,14 +164,28 @@ export default function StudentsPage() {
                 </tr>
               </thead>
               <tbody>
-                {DUMMY_STUDENTS.map((student) => (
+                {isLoading ? (
+                  <StudentSkeletonList />
+                ) : error ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-red-500">Failed to load students</td>
+                  </tr>
+                ) : students.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">No students found</td>
+                  </tr>
+                ) : students.map((student) => (
                   <tr key={student.id} className="border-b border-gray-50 dark:border-white/5 last:border-0 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <input type="checkbox" className="rounded border-gray-300 dark:border-white/20 bg-transparent" onClick={(e) => e.stopPropagation()} />
                         <Link href={`/admin/students/${student.id}`} className="flex items-center gap-3">
                           <Avatar className="w-8 h-8">
-                            <AvatarImage src={student.avatar} />
+                            {student.avatar ? (
+                              <AvatarImage asChild src={student.avatar}>
+                                <IKImage src={student.avatar} alt={student.name} width={32} height={32} />
+                              </AvatarImage>
+                            ) : null}
                             <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <span className="font-medium text-gray-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{student.name}</span>
@@ -153,10 +221,20 @@ export default function StudentsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
-            {DUMMY_STUDENTS.map((student) => (
+            {isLoading ? (
+              <StudentSkeletonGrid />
+            ) : error ? (
+              <div className="col-span-full py-12 text-center text-red-500">Failed to load students</div>
+            ) : students.length === 0 ? (
+              <div className="col-span-full py-12 text-center text-gray-500">No students found</div>
+            ) : students.map((student) => (
               <Link href={`/admin/students/${student.id}`} key={student.id} className="flex flex-col items-center justify-center p-6 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/10 rounded-3xl hover:border-blue-200 dark:hover:border-blue-500/30 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)] dark:shadow-none group cursor-pointer">
                 <Avatar className="w-20 h-20 mb-4 ring-4 ring-gray-50 dark:ring-white/5 transition-all group-hover:ring-blue-50 dark:group-hover:ring-blue-500/10">
-                  <AvatarImage src={student.avatar} />
+                  {student.avatar ? (
+                    <AvatarImage asChild src={student.avatar}>
+                      <IKImage src={student.avatar} alt={student.name} width={80} height={80} />
+                    </AvatarImage>
+                  ) : null}
                   <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <h3 className="font-semibold text-lg text-gray-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{student.name}</h3>

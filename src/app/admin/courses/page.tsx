@@ -1,79 +1,33 @@
-import React from 'react';
+"use client";
+import React, { useState } from 'react';
 import { CourseCard } from '@/components/course-card';
 import { Plus, Search, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import useSWR from 'swr';
 
-const DUMMY_COURSES = [
-  {
-    id: '1',
-    topBadge: 'UI/UX Design',
-    category: 'Design',
-    title: 'Advanced User Interface Design',
-    tags: ['Figma', 'Prototyping', 'Web'],
-    price: '$89.00',
-    instructor: 'Jane Doe',
-    bgColor: 'bg-[#FFEB3B]',
-    logoFallback: 'D'
-  },
-  {
-    id: '2',
-    topBadge: 'Development',
-    category: 'Programming',
-    title: 'Fullstack Next.js Bootcamp',
-    tags: ['React', 'Next.js', 'Tailwind'],
-    price: '$120.00',
-    instructor: 'John Smith',
-    bgColor: 'bg-[#E3F2FD]',
-    logoFallback: 'P'
-  },
-  {
-    id: '3',
-    topBadge: 'Marketing',
-    category: 'Business',
-    title: 'Digital Marketing Masterclass',
-    tags: ['SEO', 'Social Media', 'Ads'],
-    price: '$65.00',
-    instructor: 'Emily Chen',
-    bgColor: 'bg-[#FCE4EC]',
-    logoFallback: 'M'
-  },
-  {
-    id: '4',
-    topBadge: 'Data Science',
-    category: 'Analytics',
-    title: 'Python for Data Analysis',
-    tags: ['Python', 'Pandas', 'Jupyter'],
-    price: '$95.00',
-    instructor: 'Michael Brown',
-    bgColor: 'bg-[#E8F5E9]',
-    logoFallback: 'A'
-  },
-  {
-    id: '5',
-    topBadge: 'Mobile App',
-    category: 'Programming',
-    title: 'Flutter & Dart - The Complete Guide',
-    tags: ['Flutter', 'Mobile', 'iOS'],
-    price: '$110.00',
-    instructor: 'Alex Johnson',
-    bgColor: 'bg-[#E0F7FA]',
-    logoFallback: 'F'
-  },
-  {
-    id: '6',
-    topBadge: 'Photography',
-    category: 'Art',
-    title: 'Mastering Landscape Photography',
-    tags: ['Camera', 'Editing', 'Lightroom'],
-    price: '$45.00',
-    instructor: 'Sarah Wilson',
-    bgColor: 'bg-[#FFF3E0]',
-    logoFallback: 'L'
-  }
-];
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+const CourseSkeleton = () => (
+  <div className="flex flex-col gap-4 p-4 border border-gray-100 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-900 animate-pulse">
+    <div className="w-full h-48 bg-gray-200 dark:bg-zinc-800 rounded-xl"></div>
+    <div className="w-2/3 h-6 bg-gray-200 dark:bg-zinc-800 rounded-md"></div>
+    <div className="w-1/2 h-4 bg-gray-200 dark:bg-zinc-800 rounded-md"></div>
+    <div className="flex gap-2 mt-2">
+      <div className="w-16 h-6 bg-gray-200 dark:bg-zinc-800 rounded-full"></div>
+      <div className="w-16 h-6 bg-gray-200 dark:bg-zinc-800 rounded-full"></div>
+    </div>
+    <div className="mt-4 pt-4 border-t border-gray-100 dark:border-zinc-800 flex justify-between">
+      <div className="w-1/3 h-5 bg-gray-200 dark:bg-zinc-800 rounded-md"></div>
+      <div className="w-1/4 h-5 bg-gray-200 dark:bg-zinc-800 rounded-md"></div>
+    </div>
+  </div>
+);
 
 export default function AdminCoursesPage() {
+  const { data: courses, error, isLoading } = useSWR('/api/courses', fetcher);
+
+
   return (
     <div className="w-full">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-4">
@@ -104,9 +58,49 @@ export default function AdminCoursesPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {DUMMY_COURSES.map(course => (
-          <CourseCard key={course.id} {...course} />
-        ))}
+        {isLoading && (
+          <>
+            <CourseSkeleton />
+            <CourseSkeleton />
+            <CourseSkeleton />
+          </>
+        )}
+        {error && <p className="text-red-500">Failed to load courses</p>}
+        {!isLoading && !error && courses?.length === 0 && (
+          <div className="col-span-full flex flex-col items-center justify-center py-20 text-center border border-dashed border-gray-200 dark:border-zinc-800 rounded-2xl">
+            <div className="w-16 h-16 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
+              <Search className="w-6 h-6 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100 mb-1">No courses found</h3>
+            <p className="text-sm text-gray-500 dark:text-zinc-400 mb-6">You haven't created any courses yet.</p>
+            <Link href="/admin/courses/new">
+              <Button className="rounded-full bg-blue-600 hover:bg-blue-700 text-white dark:text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Create your first course
+              </Button>
+            </Link>
+          </div>
+        )}
+        {!isLoading && !error && courses?.map((course: any, idx: number) => {
+          const bgColors = ["bg-[#FFE4D6]", "bg-[#D1F2D6]", "bg-[#E2D9F3]", "bg-[#D6EFFF]", "bg-[#FDE2ED]", "bg-[#F3F4F6]"];
+          const bgColor = bgColors[idx % bgColors.length];
+          return (
+            <CourseCard
+              key={course.id}
+              adminView={true}
+              id={course.id}
+              topBadge={course.category || "General"}
+              category={course.category || "Uncategorized"}
+              title={course.title}
+              tags={course.tags || []}
+              price={course.price || "Free"}
+              instructor={course.authorName || "Unknown"}
+              bgColor={bgColor}
+              logoUrl={course.thumbnailUrl}
+              logoFallback={course.title?.charAt(0) || "C"}
+            />
+          );
+        })}
       </div>
     </div>
   );

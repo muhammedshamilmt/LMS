@@ -1,15 +1,61 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+import useSWR from "swr";
 import { Search, Filter, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CourseCard } from "@/components/course-card";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function CoursePage() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  
+  const { data: courses, error, isLoading } = useSWR('/api/courses', fetcher);
+
+  const toggleFilter = (label: string, checked: boolean) => {
+    if (checked) {
+      setSelectedFilters((prev) => [...prev, label]);
+    } else {
+      setSelectedFilters((prev) => prev.filter((f) => f !== label));
+    }
+  };
+
+  const removeFilter = (label: string) => {
+    setSelectedFilters((prev) => prev.filter((f) => f !== label));
+  };
+
+  const filteredCourses = useMemo(() => {
+    if (!courses) return [];
+    return courses.filter((course: any) => {
+      // Text Search
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matchesTitle = course.title?.toLowerCase().includes(q);
+        const matchesCategory = course.category?.toLowerCase().includes(q);
+        const matchesAuthor = course.authorName?.toLowerCase().includes(q);
+        const matchesTags = course.tags?.some((t: string) => t.toLowerCase().includes(q));
+        if (!matchesTitle && !matchesCategory && !matchesAuthor && !matchesTags) return false;
+      }
+      
+      // Facet Filtering (OR logic across selected filters)
+      if (selectedFilters.length > 0) {
+        const matchesFilter = selectedFilters.some(f => 
+            course.category?.toLowerCase() === f.toLowerCase() ||
+            course.tags?.some((t: string) => t.toLowerCase() === f.toLowerCase())
+        );
+        if (!matchesFilter) return false;
+      }
+      
+      return true;
+    });
+  }, [courses, searchQuery, selectedFilters]);
 
   return (
     <div className="flex gap-10">
@@ -28,6 +74,8 @@ export default function CoursePage() {
               <Search className="absolute left-4 w-5 h-5 text-gray-400" />
               <Input
                 placeholder="Search by course, people, theme..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-12 pr-4 py-6 rounded-full border-gray-200 bg-white shadow-[0_2px_10px_rgba(0,0,0,0.06)] text-[15px]"
               />
             </div>
@@ -37,9 +85,9 @@ export default function CoursePage() {
               onClick={() => setIsFiltersOpen(!isFiltersOpen)}
             >
               <Filter className={`w-5 h-5 ${!isFiltersOpen ? 'text-white' : 'text-gray-700'}`} />
-              {isFiltersOpen && (
-                <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white border-2 border-[#F3F4F6]">
-                  3
+              {selectedFilters.length > 0 && (
+                <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#7956ED] text-[10px] font-bold text-white border-2 border-[#F3F4F6] dark:border-zinc-900">
+                  {selectedFilters.length}
                 </span>
               )}
             </div>
@@ -51,67 +99,45 @@ export default function CoursePage() {
         </div>
 
         {/* Courses Grid */}
-        <div className="p-6 md:p-8 dark:bg-black rounded-[40px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-[1800px] mx-auto w-full">
-          <CourseCard id="1"
-            topBadge="Start: 20 May"
-            category="Design"
-            title="Advanced UI/UX Masterclass"
-            tags={["12 Weeks", "Senior level", "Online", "Certificate"]}
-            price="$250"
-            instructor="By Amazon Academy"
-            bgColor="bg-[#FFE4D6]"
-            logoFallback="a"
-          />
-          <CourseCard id="1"
-            topBadge="Start: 4 Feb"
-            category="Design"
-            title="Junior UI/UX Bootcamp"
-            tags={["8 Weeks", "Junior level", "Online", "Mentorship"]}
-            price="$150"
-            instructor="By Google Developers"
-            bgColor="bg-[#D1F2D6]"
-            logoFallback="G"
-          />
-          <CourseCard id="1"
-            topBadge="Start: 29 Jan"
-            category="Animation"
-            title="Senior Motion Design"
-            tags={["10 Weeks", "Senior level", "Live Classes"]}
-            price="$260"
-            instructor="By Dribbble Studio"
-            bgColor="bg-[#E2D9F3]"
-            logoFallback="D"
-          />
-          <CourseCard id="1"
-            topBadge="Start: 11 Apr"
-            category="Research"
-            title="UX Research Methods"
-            tags={["6 Weeks", "Middle level", "Online", "Certificate"]}
-            price="$120"
-            instructor="By Twitter Design"
-            bgColor="bg-[#D6EFFF]"
-            logoFallback="T"
-          />
-          <CourseCard id="1"
-            topBadge="Start: 2 Apr"
-            category="Design"
-            title="Graphic Design Principles"
-            tags={["8 Weeks", "Senior level"]}
-            price="$300"
-            instructor="By Airbnb Creative"
-            bgColor="bg-[#FDE2ED]"
-            logoFallback="A"
-          />
-          <CourseCard id="1"
-            topBadge="Start: 18 Jan"
-            category="Design"
-            title="Apple Design Language"
-            tags={["12 Weeks", "Online"]}
-            price="$140"
-            instructor="By Apple Design"
-            bgColor="bg-[#F3F4F6]"
-            logoFallback="A"
-          />
+        <div className="p-6 md:p-8 dark:bg-black rounded-[40px] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {isLoading && (
+            <>
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="flex flex-col gap-3">
+                  <Skeleton className="h-[200px] w-full rounded-2xl" />
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              ))}
+            </>
+          )}
+
+          {!isLoading && filteredCourses.length === 0 && (
+            <div className="col-span-full flex flex-col items-center justify-center text-gray-500 py-20">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No courses found</h3>
+              <p>Try adjusting your search or filters.</p>
+            </div>
+          )}
+
+          {!isLoading && filteredCourses.map((course: any, idx: number) => {
+            const bgColors = ["bg-[#FFE4D6]", "bg-[#D1F2D6]", "bg-[#E2D9F3]", "bg-[#D6EFFF]", "bg-[#FDE2ED]", "bg-[#F3F4F6]"];
+            const bgColor = bgColors[idx % bgColors.length];
+            return (
+              <CourseCard
+                key={course.id}
+                id={course.id}
+                topBadge={course.isDraft ? "Draft" : "Published"}
+                category={course.category || "General"}
+                title={course.title}
+                tags={course.tags && course.tags.length > 0 ? course.tags : ["Online"]}
+                price={course.price || "Free"}
+                instructor={course.authorName ? `By ${course.authorName}` : "Platform Instructor"}
+                bgColor={bgColor}
+                logoUrl={course.thumbnailUrl}
+                logoFallback={course.category ? course.category[0] : "C"}
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -129,43 +155,40 @@ export default function CoursePage() {
           </div>
 
           {/* Active Filters */}
-          <div className="flex flex-wrap gap-2 mb-8">
-            <Badge variant="secondary" className="bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium flex gap-2 items-center shadow-sm">
-              Intermediate <X className="w-3 h-3 text-gray-400 cursor-pointer hover:text-black" />
-            </Badge>
-            <Badge variant="secondary" className="bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium flex gap-2 items-center shadow-sm">
-              English <X className="w-3 h-3 text-gray-400 cursor-pointer hover:text-black" />
-            </Badge>
-            <Badge variant="secondary" className="bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium flex gap-2 items-center shadow-sm">
-              6+ months <X className="w-3 h-3 text-gray-400 cursor-pointer hover:text-black" />
-            </Badge>
-          </div>
+          {selectedFilters.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-8">
+              {selectedFilters.map(filter => (
+                <Badge key={filter} variant="secondary" className="bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full font-medium flex gap-2 items-center shadow-sm">
+                  {filter} <X className="w-3 h-3 text-gray-400 cursor-pointer hover:text-black" onClick={() => removeFilter(filter)} />
+                </Badge>
+              ))}
+            </div>
+          )}
 
           {/* Filter Sections */}
           <div className="space-y-8">
             <FilterSection title="Difficulty Level">
-              <FilterItem label="Beginner" />
-              <FilterItem label="Intermediate" checked />
-              <FilterItem label="Advanced" />
+              {['Beginner', 'Intermediate', 'Advanced'].map(f => (
+                <FilterItem key={f} label={f} checked={selectedFilters.includes(f)} onChange={(c) => toggleFilter(f, c)} />
+              ))}
             </FilterSection>
 
             <FilterSection title="Course Duration">
-              <FilterItem label="Less than 1 month" />
-              <FilterItem label="1-3 months" />
-              <FilterItem label="3+ months" />
-              <FilterItem label="6+ months" checked />
+              {['Less than 1 month', '1-3 months', '3+ months', '6+ months'].map(f => (
+                <FilterItem key={f} label={f} checked={selectedFilters.includes(f)} onChange={(c) => toggleFilter(f, c)} />
+              ))}
             </FilterSection>
 
             <FilterSection title="Popularity">
-              <FilterItem label="Most Enrolled" />
-              <FilterItem label="Highest Rated" />
-              <FilterItem label="Trending" />
+              {['Most Enrolled', 'Highest Rated', 'Trending'].map(f => (
+                <FilterItem key={f} label={f} checked={selectedFilters.includes(f)} onChange={(c) => toggleFilter(f, c)} />
+              ))}
             </FilterSection>
 
             <FilterSection title="Language">
-              <FilterItem label="English" checked />
-              <FilterItem label="Spanish" />
-              <FilterItem label="German" />
+              {['English', 'Spanish', 'German'].map(f => (
+                <FilterItem key={f} label={f} checked={selectedFilters.includes(f)} onChange={(c) => toggleFilter(f, c)} />
+              ))}
             </FilterSection>
           </div>
         </div>
@@ -186,10 +209,15 @@ function FilterSection({ title, children }: { title: string; children: React.Rea
   );
 }
 
-function FilterItem({ label, checked = false }: { label: string; checked?: boolean }) {
+function FilterItem({ label, checked = false, onChange }: { label: string; checked?: boolean; onChange?: (checked: boolean) => void }) {
   return (
     <div className="flex items-center space-x-3">
-      <Checkbox id={label} defaultChecked={checked} className="w-5 h-5 rounded-[4px] border-gray-300 data-[state=checked]:bg-black data-[state=checked]:text-white" />
+      <Checkbox 
+        id={label} 
+        checked={checked} 
+        onCheckedChange={(c) => onChange && onChange(c === true)}
+        className="w-5 h-5 rounded-[4px] border-gray-300 data-[state=checked]:bg-black data-[state=checked]:text-white" 
+      />
       <label
         htmlFor={label}
         className="text-[15px] font-medium leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"

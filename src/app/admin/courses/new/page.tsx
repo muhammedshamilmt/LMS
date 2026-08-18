@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight,
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 const steps = [
   { id: "basic", title: "Basic Information" },
@@ -30,6 +31,7 @@ const steps = [
 export default function NewCourseWizard() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -76,6 +78,42 @@ export default function NewCourseWizard() {
     isDraft: true,
   });
 
+  useEffect(() => {
+    const saved = localStorage.getItem('lms_new_course_draft');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setFormData(prev => ({
+          ...prev,
+          ...parsed,
+          thumbnailFile: null,
+          videoFile: null,
+          authorAvatarFile: null,
+          modules: parsed.modules?.map((m: any) => ({ ...m, mediaFile: null })) || prev.modules,
+          notes: parsed.notes?.map((n: any) => ({ ...n, file: null })) || prev.notes,
+        }));
+      } catch (e) {
+        console.error("Failed to parse draft", e);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const toSave = { ...formData };
+    delete (toSave as any).thumbnailFile;
+    delete (toSave as any).videoFile;
+    delete (toSave as any).authorAvatarFile;
+    toSave.modules = toSave.modules.map(m => {
+      const { mediaFile, ...rest } = m as any;
+      return rest as any;
+    });
+    toSave.notes = toSave.notes.map(n => {
+      const { file, ...rest } = n as any;
+      return rest as any;
+    });
+    localStorage.setItem('lms_new_course_draft', JSON.stringify(toSave));
+  }, [formData]);
+
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
 
@@ -83,9 +121,65 @@ export default function NewCourseWizard() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = () => {
-    // In a real app, you would make an API call here.
-    setIsSubmitted(true);
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    const supabase = createClient();
+
+    try {
+      const uploadFile = async (file: File | null) => {
+        if (!file) return "";
+        const ext = file.name.split('.').pop();
+        const path = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+        const { data, error } = await supabase.storage.from('lms_temp_uploads').upload(path, file);
+        if (error) throw error;
+        return `temp:${data.path}`;
+      };
+
+      const finalData = { ...formData };
+
+      if (formData.thumbnailType === 'upload' && formData.thumbnailFile) {
+        finalData.thumbnailUrl = await uploadFile(formData.thumbnailFile);
+      }
+      if (formData.videoType === 'upload' && formData.videoFile) {
+        finalData.videoUrl = await uploadFile(formData.videoFile);
+      }
+      if (formData.authorAvatarType === 'upload' && formData.authorAvatarFile) {
+        finalData.authorAvatarUrl = await uploadFile(formData.authorAvatarFile);
+      }
+
+      for (let i = 0; i < finalData.modules.length; i++) {
+        if (finalData.modules[i].mediaType === 'upload' && finalData.modules[i].mediaFile) {
+          finalData.modules[i].mediaUrl = await uploadFile(finalData.modules[i].mediaFile);
+        }
+      }
+
+      for (let i = 0; i < finalData.notes.length; i++) {
+        if (finalData.notes[i].resourceType === 'upload' && finalData.notes[i].file) {
+          finalData.notes[i].url = await uploadFile(finalData.notes[i].file);
+        }
+      }
+
+      delete (finalData as any).thumbnailFile;
+      delete (finalData as any).videoFile;
+      delete (finalData as any).authorAvatarFile;
+      finalData.modules.forEach(m => delete (m as any).mediaFile);
+      finalData.notes.forEach(n => delete (n as any).file);
+
+      const res = await fetch('/api/courses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(finalData)
+      });
+      
+      if (!res.ok) throw new Error("Failed to save course");
+      localStorage.removeItem('lms_new_course_draft');
+      setIsSubmitted(true);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit course. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {
@@ -116,9 +210,9 @@ export default function NewCourseWizard() {
             <Link href="/admin/courses">
               <Button variant="outline" className="rounded-full px-8 py-6 text-sm font-semibold">Return to Courses</Button>
             </Link>
-            <Link href="/admin/courses">
+            <Link href="/admin/queue">
               <Button className="rounded-full px-8 py-6 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white">
-                View in Dashboard
+                View Upload Queue
               </Button>
             </Link>
           </div>
@@ -210,9 +304,9 @@ export default function NewCourseWizard() {
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           ) : (
-            <Button onClick={handleSubmit} className="rounded-full px-8 bg-green-600 hover:bg-green-700 text-white">
-              {formData.isDraft ? "Save Draft" : "Publish Course"}
-              <CheckCircle2 className="w-4 h-4 ml-2" />
+            <Button onClick={handleSubmit} disabled={isSubmitting} className="rounded-full px-8 bg-green-600 hover:bg-green-700 text-white">
+              {isSubmitting ? "Processing..." : (formData.isDraft ? "Save Draft" : "Publish Course")}
+              {!isSubmitting && <CheckCircle2 className="w-4 h-4 ml-2" />}
             </Button>
           )}
         </div>

@@ -1,40 +1,9 @@
 import React from 'react';
 import { Search, ChevronDown, Check } from 'lucide-react';
 
-const orders = [
-  {
-    id: '#2489',
-    product: 'Premium T-Shirt',
-    date: 'Aug 24, 2026',
-    customer: 'Alice Johnson',
-    category: 'Clothing',
-    status: 'Delivered',
-    items: 2,
-    total: '$45.00'
-  },
-  {
-    id: '#2488',
-    product: 'Wireless Headphones',
-    date: 'Aug 23, 2026',
-    customer: 'Bob Smith',
-    category: 'Electronics',
-    status: 'Processing',
-    items: 1,
-    total: '$120.00'
-  },
-  {
-    id: '#2487',
-    product: 'Coffee Mug',
-    date: 'Aug 22, 2026',
-    customer: 'Charlie Brown',
-    category: 'Kitchen',
-    status: 'Cancelled',
-    items: 4,
-    total: '$32.00'
-  }
-];
+// Static data removed
 
-export function RecentOrdersTable() {
+export function RecentOrdersTable({ orders = [] }: { orders?: any[] }) {
   return (
     <div className="flex flex-col bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/10 rounded-3xl mt-8 mb-12 shadow-sm dark:shadow-none">
       <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 dark:border-white/5">
@@ -69,9 +38,8 @@ export function RecentOrdersTable() {
               <th className="px-6 py-4 font-medium">Order Id</th>
               <th className="px-6 py-4 font-medium">Date</th>
               <th className="px-6 py-4 font-medium">Customer</th>
-              <th className="px-6 py-4 font-medium">Category</th>
+              <th className="px-6 py-4 font-medium">Payment Method</th>
               <th className="px-6 py-4 font-medium">Status</th>
-              <th className="px-6 py-4 font-medium">Items</th>
               <th className="px-6 py-4 font-medium rounded-tr-3xl">Total</th>
             </tr>
           </thead>
@@ -88,7 +56,18 @@ export function RecentOrdersTable() {
                 </td>
                 <td className="px-6 py-4 text-gray-500 dark:text-zinc-400">{order.id}</td>
                 <td className="px-6 py-4 text-gray-500 dark:text-zinc-400">{order.date}</td>
-                <td className="px-6 py-4 text-gray-900 dark:text-zinc-300">{order.customer}</td>
+                <td className="px-6 py-4 text-gray-900 dark:text-zinc-300">
+                  <div className="flex items-center gap-2">
+                    {order.avatar ? (
+                      <img src={order.avatar} alt={order.customer} className="w-6 h-6 rounded-full" />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-zinc-800 flex items-center justify-center text-xs font-medium text-gray-500">
+                        {order.customer.charAt(0)}
+                      </div>
+                    )}
+                    {order.customer}
+                  </div>
+                </td>
                 <td className="px-6 py-4 text-gray-500 dark:text-zinc-400">{order.category}</td>
                 <td className="px-6 py-4">
                   <span className={`px-3 py-1 text-xs font-medium rounded-full border ${
@@ -101,7 +80,6 @@ export function RecentOrdersTable() {
                     {order.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-gray-500 dark:text-zinc-400">{order.items}</td>
                 <td className="px-6 py-4 font-medium text-gray-900 dark:text-zinc-100">{order.total}</td>
               </tr>
             ))}

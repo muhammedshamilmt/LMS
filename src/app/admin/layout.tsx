@@ -1,6 +1,7 @@
 import React from "react";
 import { NavigationProvider } from "@/contexts/NavigationContext";
 import { NavigationWrapper } from "@/components/admin/NavigationWrapper";
+import { UploadQueueProvider } from "@/contexts/UploadQueueContext";
 
 export default function AdminLayout({
   children,
@@ -9,9 +10,11 @@ export default function AdminLayout({
 }) {
   return (
     <NavigationProvider>
-      <NavigationWrapper>
-        {children}
-      </NavigationWrapper>
+      <UploadQueueProvider>
+        <NavigationWrapper>
+          {children}
+        </NavigationWrapper>
+      </UploadQueueProvider>
     </NavigationProvider>
   );
 }

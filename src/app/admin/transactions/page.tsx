@@ -19,98 +19,49 @@ import {
   BookOpen
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import useSWR from "swr";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function TransactionsPage() {
   const [selectedTx, setSelectedTx] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("payment_lines");
 
-  const transactions = [
-    {
-      id: 1,
-      type: "Sent",
-      typeIcon: <ArrowUp className="w-4 h-4 text-pink-500" />,
-      typeBg: "bg-pink-100 dark:bg-pink-900/30",
-      amount: "- 200.000 IDR",
-      subAmount: "45 USD",
-      paymentMethod: "Credit Card",
-      paymentDetail: "**** 6969",
-      status: "Success",
-      activity: "Sending money to Raihan Fikri",
-      personName: "Raihan Zuhilmin",
-      personInitial: "R",
-      date: "Aug 28, 2023 3:40 PM",
-      details: {
-        account: "raihan@example.com",
-        date: "28 Aug 23",
-        tags: [
-          { label: "Transfer", color: "bg-pink-100 text-pink-700" },
-          { label: "Services", color: "bg-blue-100 text-blue-700" }
-        ],
-        paymentLines: [
-          {
-            name: "Freelance Development",
-            id: "TRX-8831",
-            dateRange: "Aug 2023",
-            nights: "1 Project",
-            breakdown: [
-              { label: "Service Fee", amount: "200.000 IDR" },
-              { label: "Transfer Fee", amount: "0 IDR" }
-            ],
-            total: "200.000 IDR"
-          }
-        ]
-      }
-    },
-    {
-      id: 2,
-      type: "Received",
-      typeIcon: <ArrowDown className="w-4 h-4 text-blue-500" />,
-      typeBg: "bg-blue-100 dark:bg-blue-900/30",
-      amount: "+ £1,600.00",
-      subAmount: "2,050 USD",
-      paymentMethod: "Bank Transfer",
-      paymentDetail: "**** 1234",
-      status: "Success",
-      activity: "Airbnb Payout",
-      personName: "Airbnb",
-      personInitial: "A",
-      date: "Aug 29, 2023 10:15 AM",
-      details: {
-        account: "airbnb1@propertymanager.com",
-        date: "3 Jan 22",
-        tags: [
-          { label: "AirbnbGeneral1", color: "bg-pink-100 text-pink-700" },
-          { label: "Accommodation", color: "bg-purple-100 text-purple-700" },
-          { label: "Cleaning_Fee", color: "bg-blue-100 text-blue-700" }
-        ],
-        paymentLines: [
-          {
-            name: "John",
-            id: "12345",
-            dateRange: "1 Jan 22 - 5 Jan 22",
-            nights: "4 nights",
-            breakdown: [
-              { label: "Accommodation", amount: "£1,000.00" },
-              { label: "Cleaning", amount: "£100.00" },
-              { label: "Ota Fee", amount: "-£50.00" }
-            ],
-            total: "£1,050.00"
-          },
-          {
-            name: "Sarah",
-            id: "67890",
-            dateRange: "3 Jan 22 - 7 Jan 22",
-            nights: "4 nights",
-            breakdown: [
-              { label: "Accommodation", amount: "£500.00" },
-              { label: "Cleaning", amount: "£50.00" }
-            ],
-            total: "£550.00"
-          }
-        ]
-      }
-    }
-  ];
+  const { data, error, isLoading } = useSWR('/api/admin/transactions', fetcher);
+  
+  if (isLoading) {
+    return (
+      <div className="p-8 space-y-8 animate-pulse">
+        <Skeleton className="h-12 w-[300px]" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Skeleton className="h-32 rounded-3xl" />
+          <Skeleton className="h-32 rounded-3xl" />
+          <Skeleton className="h-32 rounded-3xl" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-64 rounded-3xl" />
+          <Skeleton className="h-64 rounded-3xl" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="p-8 text-center text-red-500">Failed to load transactions.</div>;
+  }
+
+  const {
+    accountBalance = 0,
+    totalExpenses = 0,
+    totalSavings = 0,
+    courseGrowth = { totalCourses: 0, activeStudents: 0 },
+    bestSellingCourses = [],
+    chartData = [],
+    recentTransactions = []
+  } = data || {};
+
+  const transactions = recentTransactions;
 
   return (
     <div className="flex flex-col gap-6 mx-auto w-full text-gray-900 dark:text-gray-100 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500 relative overflow-hidden">
@@ -150,10 +101,10 @@ export default function TransactionsPage() {
             </div>
           </div>
           <div>
-            <h2 className="text-3xl font-bold mb-2">$35,340.89</h2>
+            <h2 className="text-3xl font-bold mb-2">${accountBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h2>
             <div className="flex items-center gap-2 text-sm">
               <span className="flex items-center gap-1 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-2 py-0.5 rounded-full font-medium">
-                <ArrowUpRight className="w-3 h-3" /> 3.2%
+                <ArrowUpRight className="w-3 h-3" /> 0.0%
               </span>
               <span className="text-gray-500 dark:text-gray-400">from last month</span>
             </div>
@@ -174,10 +125,10 @@ export default function TransactionsPage() {
             </button>
           </div>
           <div>
-            <h2 className="text-3xl font-bold mb-2">$9,845.20</h2>
+            <h2 className="text-3xl font-bold mb-2">${totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h2>
             <div className="flex items-center gap-2 text-sm">
               <span className="flex items-center gap-1 text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-2 py-0.5 rounded-full font-medium">
-                <ArrowDownRight className="w-3 h-3" /> -2.1%
+                <ArrowDownRight className="w-3 h-3" /> 0.0%
               </span>
               <span className="text-gray-500 dark:text-gray-400">from last month</span>
             </div>
@@ -198,10 +149,10 @@ export default function TransactionsPage() {
             </button>
           </div>
           <div>
-            <h2 className="text-3xl font-bold mb-2">$18,420.75</h2>
+            <h2 className="text-3xl font-bold mb-2">${totalSavings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h2>
             <div className="flex items-center gap-2 text-sm">
               <span className="flex items-center gap-1 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-2 py-0.5 rounded-full font-medium">
-                <ArrowUpRight className="w-3 h-3" /> +4.5%
+                <ArrowUpRight className="w-3 h-3" /> 0.0%
               </span>
               <span className="text-gray-500 dark:text-gray-400">from last month</span>
             </div>
@@ -228,8 +179,8 @@ export default function TransactionsPage() {
                 </div>
                 <span className="font-medium text-sm text-gray-700 dark:text-gray-300">Total Courses</span>
               </div>
-              <div className="text-2xl font-bold">124</div>
-              <div className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">+12 this month</div>
+              <div className="text-2xl font-bold">{courseGrowth.totalCourses}</div>
+              <div className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">Lifetime total</div>
             </div>
 
             <div className="p-5 bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100 dark:border-indigo-900/30">
@@ -239,40 +190,30 @@ export default function TransactionsPage() {
                 </div>
                 <span className="font-medium text-sm text-gray-700 dark:text-gray-300">Active Students</span>
               </div>
-              <div className="text-2xl font-bold">3,892</div>
-              <div className="text-xs text-indigo-600 dark:text-indigo-400 mt-1 font-medium">+145 this month</div>
+              <div className="text-2xl font-bold">{courseGrowth.activeStudents}</div>
+              <div className="text-xs text-indigo-600 dark:text-indigo-400 mt-1 font-medium">Lifetime total</div>
             </div>
           </div>
 
           <div>
             <h4 className="font-medium text-sm text-gray-500 mb-4">Best Selling Courses (Payments)</h4>
             <div className="space-y-4">
-              <div className="flex items-center justify-between group cursor-pointer">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-xl">🚀</div>
-                  <div>
-                    <div className="font-medium text-sm group-hover:text-blue-600 transition-colors">Advanced Next.js Mastery</div>
-                    <div className="text-xs text-gray-500">234 Sales</div>
+              {bestSellingCourses.length > 0 ? bestSellingCourses.map((course: any, idx: number) => (
+                <div key={idx} className="flex items-center justify-between group cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-xl">🚀</div>
+                    <div>
+                      <div className="font-medium text-sm group-hover:text-blue-600 transition-colors">{course.title}</div>
+                      <div className="text-xs text-gray-500">{course.sales} Sales</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium text-sm">${course.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="font-medium text-sm">$11,466</div>
-                  <div className="text-xs text-green-500 flex items-center gap-1 justify-end"><ArrowUpRight className="w-3 h-3" /> 12%</div>
-                </div>
-              </div>
-              <div className="flex items-center justify-between group cursor-pointer">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-xl">🎨</div>
-                  <div>
-                    <div className="font-medium text-sm group-hover:text-blue-600 transition-colors">UI/UX Design Fundamentals</div>
-                    <div className="text-xs text-gray-500">189 Sales</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-medium text-sm">$8,316</div>
-                  <div className="text-xs text-green-500 flex items-center gap-1 justify-end"><ArrowUpRight className="w-3 h-3" /> 8%</div>
-                </div>
-              </div>
+              )) : (
+                <div className="text-sm text-gray-500">No courses sold yet.</div>
+              )}
             </div>
           </div>
         </div>
@@ -298,33 +239,44 @@ export default function TransactionsPage() {
           </div>
 
           <div className="flex-1 relative flex items-end min-h-[220px] gap-2 md:gap-4 mt-auto border-b border-gray-100 dark:border-zinc-800 pb-2">
-            <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-gray-400 pr-2">
-              <span>$40k</span>
-              <span>$30k</span>
-              <span>$20k</span>
-              <span>$10k</span>
-              <span>$0k</span>
-            </div>
+            {(() => {
+              const maxEarnings = Math.max(...(chartData.map((d: any) => d.earnings) || [0]), 100); // minimum scale 100
+              const ticks = [maxEarnings, maxEarnings * 0.75, maxEarnings * 0.5, maxEarnings * 0.25, 0];
+              
+              return (
+                <>
+                  <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-gray-400 pr-2">
+                    {ticks.map((tick, i) => (
+                      <span key={i}>${(tick / 1000).toFixed(1)}k</span>
+                    ))}
+                  </div>
 
-            <div className="w-full flex justify-between items-end pl-10 h-full relative z-10">
-              <div className="w-[7%] bg-blue-100 dark:bg-blue-900/40 rounded-t-sm h-[40%] hover:bg-blue-200 dark:hover:bg-blue-800/60 transition-colors"></div>
-              <div className="w-[7%] bg-blue-200 dark:bg-blue-800/40 rounded-t-sm h-[60%] hover:bg-blue-300 dark:hover:bg-blue-700/60 transition-colors"></div>
-              <div className="w-[7%] bg-blue-100 dark:bg-blue-900/40 rounded-t-sm h-[70%] hover:bg-blue-200 dark:hover:bg-blue-800/60 transition-colors"></div>
-              <div className="w-[7%] bg-blue-200 dark:bg-blue-800/40 rounded-t-sm h-[30%] hover:bg-blue-300 dark:hover:bg-blue-700/60 transition-colors"></div>
-              <div className="w-[7%] bg-blue-100 dark:bg-blue-900/40 rounded-t-sm h-[20%] hover:bg-blue-200 dark:hover:bg-blue-800/60 transition-colors"></div>
-              <div className="w-[7%] bg-blue-200 dark:bg-blue-800/40 rounded-t-sm h-[50%] hover:bg-blue-300 dark:hover:bg-blue-700/60 transition-colors"></div>
-              <div className="w-[7%] bg-blue-100 dark:bg-blue-900/40 rounded-t-sm h-[60%] hover:bg-blue-200 dark:hover:bg-blue-800/60 transition-colors"></div>
-              {/* Highlighted Bar */}
-              <div className="w-[9%] bg-blue-600 rounded-t-sm h-[90%] relative group cursor-pointer transition-all ">
-                <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-black dark:bg-white text-white dark:text-black text-xs px-3 py-1.5 rounded  whitespace-nowrap opacity-100">
-                  <div className="text-[10px] text-gray-300 dark:text-gray-600">Earnings</div>
-                  <div className="font-bold">$84,849.93</div>
-                </div>
-              </div>
-              <div className="w-[7%] bg-blue-200 dark:bg-blue-800/40 rounded-t-sm h-[50%] hover:bg-blue-300 dark:hover:bg-blue-700/60 transition-colors"></div>
-              <div className="w-[7%] bg-blue-100 dark:bg-blue-900/40 rounded-t-sm h-[35%] hover:bg-blue-200 dark:hover:bg-blue-800/60 transition-colors"></div>
-              <div className="w-[7%] bg-blue-200 dark:bg-blue-800/40 rounded-t-sm h-[55%] hover:bg-blue-300 dark:hover:bg-blue-700/60 transition-colors"></div>
-            </div>
+                  <div className="w-full flex justify-between items-end pl-10 h-full relative z-10">
+                    {chartData.map((data: any, idx: number) => {
+                      const heightPercent = Math.max((data.earnings / maxEarnings) * 100, 5); // min 5% height for visibility
+                      const isCurrentMonth = idx === new Date().getMonth();
+                      
+                      return (
+                        <div 
+                          key={idx}
+                          className={`w-[7%] rounded-t-sm relative group cursor-pointer transition-all ${
+                            isCurrentMonth 
+                              ? "bg-blue-600 hover:bg-blue-700" 
+                              : "bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-800/60"
+                          }`}
+                          style={{ height: `${heightPercent}%` }}
+                        >
+                          <div className={`absolute -top-12 left-1/2 -translate-x-1/2 bg-black dark:bg-white text-white dark:text-black text-xs px-3 py-1.5 rounded whitespace-nowrap ${isCurrentMonth ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                            <div className="text-[10px] text-gray-300 dark:text-gray-600">Earnings</div>
+                            <div className="font-bold">${data.earnings.toLocaleString()}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           <div className="flex justify-between pl-10 mt-3 text-xs text-gray-400">
@@ -361,7 +313,7 @@ export default function TransactionsPage() {
               </tr>
             </thead>
             <tbody>
-              {transactions.map((tx) => (
+              {transactions.length > 0 ? transactions.map((tx: any) => (
                 <tr
                   key={tx.id}
                   className="border-b border-gray-50 dark:border-zinc-800/50 hover:bg-gray-50 dark:hover:bg-zinc-800/80 transition-colors group cursor-pointer"
@@ -369,22 +321,22 @@ export default function TransactionsPage() {
                 >
                   <td className="py-4 px-2">
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full ${tx.typeBg} flex items-center justify-center group-hover:scale-105 transition-transform`}>
-                        {tx.typeIcon}
+                      <div className={`w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:scale-105 transition-transform`}>
+                        <ArrowDown className="w-4 h-4 text-blue-500" />
                       </div>
-                      <span className="font-medium text-gray-700 dark:text-gray-200">{tx.type}</span>
+                      <span className="font-medium text-gray-700 dark:text-gray-200">{tx.type || 'Received'}</span>
                     </div>
                   </td>
                   <td className="py-4">
                     <div className="font-bold text-gray-900 dark:text-gray-100">{tx.amount}</div>
-                    <div className="text-xs text-gray-400 font-medium">{tx.subAmount}</div>
+                    <div className="text-xs text-gray-400 font-medium">USD</div>
                   </td>
                   <td className="py-4">
-                    <div className="font-medium text-gray-700 dark:text-gray-200">{tx.paymentMethod}</div>
-                    <div className="text-xs text-gray-400">{tx.paymentDetail}</div>
+                    <div className="font-medium text-gray-700 dark:text-gray-200 capitalize">{tx.paymentMethod}</div>
+                    <div className="text-xs text-gray-400">Card</div>
                   </td>
                   <td className="py-4">
-                    <span className="inline-flex items-center gap-1.5 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-2.5 py-1 rounded-full text-xs font-medium">
+                    <span className="inline-flex items-center gap-1.5 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-2.5 py-1 rounded-full text-xs font-medium capitalize">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       {tx.status}
                     </span>
@@ -395,16 +347,21 @@ export default function TransactionsPage() {
                   <td className="py-4">
                     <div className="flex items-center gap-2">
                       <Avatar className="w-6 h-6">
-                        <AvatarFallback className="bg-orange-400 text-white text-[10px]">{tx.personInitial}</AvatarFallback>
+                        <AvatarImage src={tx.personAvatar || undefined} />
+                        <AvatarFallback className="bg-orange-400 text-white text-[10px] uppercase">{tx.personInitial}</AvatarFallback>
                       </Avatar>
                       <span className="font-medium text-gray-700 dark:text-gray-200">{tx.personName}</span>
                     </div>
                   </td>
-                  <td className="py-4 text-gray-600 dark:text-gray-300 font-medium">
+                  <td className="py-4 text-gray-600 dark:text-gray-300 font-medium text-sm">
                     {tx.date}
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-gray-500">No transactions found</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -443,7 +400,7 @@ export default function TransactionsPage() {
                     <div>
                       <div className="text-sm text-gray-500 font-medium mb-0.5">Account</div>
                       <div className="font-medium text-[15px] text-gray-900 dark:text-gray-100">
-                        {selectedTx.details?.account || "account@example.com"}
+                        {selectedTx.personEmail || "account@example.com"}
                       </div>
                     </div>
                   </div>
@@ -453,7 +410,7 @@ export default function TransactionsPage() {
                 </div>
 
                 <div className="text-[28px] font-semibold mb-5 text-gray-900 dark:text-white">
-                  {selectedTx.amount.replace(/[-+]\s?/, '')}
+                  {selectedTx.amount}
                 </div>
 
                 <div className="flex flex-wrap gap-2">

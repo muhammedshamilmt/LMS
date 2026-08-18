@@ -64,39 +64,39 @@ function MetricCard({ title, value, trend, trendValue, previousValue, icon: Icon
   );
 }
 
-export function MetricCards() {
+export function MetricCards({ metricsData }: { metricsData?: any }) {
   const metrics = [
     {
-      title: "Total Sales",
-      value: "2500",
+      title: "Total Enrollments",
+      value: String(metricsData?.totalEnrollments || 0),
       trend: "up" as const,
-      trendValue: "4.9%",
-      previousValue: "2345",
+      trendValue: "New",
+      previousValue: "0",
       icon: ShoppingCart,
       isPrimary: true,
     },
     {
-      title: "New Customer",
-      value: "110",
+      title: "Total Students",
+      value: String(metricsData?.totalStudents || 0),
       trend: "up" as const,
-      trendValue: "7.5%",
-      previousValue: "89",
+      trendValue: "New",
+      previousValue: "0",
       icon: Users,
     },
     {
-      title: "Return Products",
-      value: "72",
-      trend: "down" as const,
-      trendValue: "6.0%",
-      previousValue: "60",
+      title: "Active Courses",
+      value: String(metricsData?.activeCourses || 0),
+      trend: "up" as const,
+      trendValue: "New",
+      previousValue: "0",
       icon: Package,
     },
     {
       title: "Total Revenue",
-      value: "$8,220.64",
+      value: `$${Number(metricsData?.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       trend: "up" as const,
-      trendValue: "",
-      previousValue: "$620.00",
+      trendValue: "New",
+      previousValue: "$0.00",
       icon: DollarSign,
     },
   ];

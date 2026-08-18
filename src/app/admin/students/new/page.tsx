@@ -4,10 +4,13 @@ import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, User, Mail, Phone, MapPin, Monitor, CheckCircle2, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { createStudent } from '@/app/actions/adminStudents';
 
 export default function NewStudentPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const totalSteps = 3;
 
   const [formData, setFormData] = useState({
@@ -33,11 +36,25 @@ export default function NewStudentPage() {
     if (currentStep > 1) setCurrentStep((prev) => prev - 1);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate submission
-    console.log("Submitting new student", formData);
-    setIsSuccess(true);
+    setLoading(true);
+    setError(null);
+    
+    const data = new FormData();
+    data.append('email', formData.email);
+    data.append('fullName', `${formData.firstName} ${formData.lastName}`.trim());
+    data.append('phone', formData.phone);
+    
+    const result = await createStudent(data);
+    
+    if (result.error) {
+      setError(result.error);
+      setLoading(false);
+    } else {
+      setIsSuccess(true);
+      setLoading(false);
+    }
   };
 
   if (isSuccess) {
@@ -295,12 +312,16 @@ export default function NewStudentPage() {
               Next Step <ChevronRight className="w-4 h-4" />
             </Button>
           ) : (
-            <Button
-              onClick={handleSubmit}
-              className="gap-2 rounded-full px-8 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-900 dark:hover:bg-gray-100 border-0 transition-colors shadow-lg shadow-black/10 dark:shadow-white/10"
-            >
-              <Save className="w-4 h-4" /> Confirm & Add Student
-            </Button>
+            <div className="flex flex-col items-end">
+              {error && <span className="text-red-500 text-sm mb-2">{error}</span>}
+              <Button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="gap-2 rounded-full px-8 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-900 dark:hover:bg-gray-100 border-0 transition-colors shadow-lg shadow-black/10 dark:shadow-white/10"
+              >
+                <Save className="w-4 h-4" /> {loading ? 'Adding Student...' : 'Confirm & Add Student'}
+              </Button>
+            </div>
           )}
         </div>
       </div>

@@ -13,6 +13,7 @@ export interface CourseCardProps {
   logoUrl?: string;
   logoFallback?: string;
   id?: string;
+  adminView?: boolean;
 }
 
 export function CourseCard({
@@ -26,6 +27,7 @@ export function CourseCard({
   logoUrl,
   logoFallback,
   id,
+  adminView,
 }: CourseCardProps) {
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-[28px] p-2  border border-gray-100 dark:border-zinc-800 flex flex-col shadow-[0_1px_3px_rgba(0,0,0,0.01),_0_4px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.02),_0_8px_16px_rgba(0,0,0,0.03)] transition-shadow duration-300">
@@ -43,20 +45,20 @@ export function CourseCard({
         <div className="flex justify-between items-start mb-6">
           <div className="flex-1">
             <div className="text-[13px] font-medium text-gray-700 mb-1">{category}</div>
-            <h3 className="text-[22px] font-bold text-gray-900 leading-[1.2] max-w-[160px]">
+            <h3 className="text-[22px] font-bold text-gray-900 leading-[1.2] max-w-[300px]">
               {title}
             </h3>
           </div>
           <div className="w-12 h-12 rounded-full bg-white  flex items-center justify-center flex-shrink-0 ml-4 overflow-hidden ">
             {logoUrl ? (
-              <img src={logoUrl} alt={category} className="w-7 h-7 object-contain" />
+              <img src={logoUrl} alt={category} className="w-full h-full object-cover" />
             ) : (
               <span className="font-bold text-xl">{logoFallback || category[0]}</span>
             )}
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 mt-auto">
+        <div className="flex flex-wrap gap-1.5 mt-auto">
           {tags.map((tag, idx) => (
             <div
               key={idx}
@@ -71,11 +73,11 @@ export function CourseCard({
       {/* Bottom Section */}
       <div className="p-5 flex items-end justify-between">
         <div>
-          <div className="text-[16px] font-bold text-gray-900 dark:text-white mb-0.5">{price}</div>
+          <div className="text-[16px] font-bold text-gray-900 dark:text-white mb-0.5">${price}</div>
           <div className="text-[13px] text-gray-400 font-medium">{instructor}</div>
         </div>
-        <Link href={id ? `/students/courses/${id}/enroll` : '#'} className="bg-black dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-full text-[14px] font-semibold hover:bg-black/90 dark:hover:bg-gray-200 transition ">
-          View Course
+        <Link href={id ? (adminView ? `/admin/courses/${id}` : `/students/courses/${id}/enroll`) : '#'} className="bg-black dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-full text-[14px] font-semibold hover:bg-black/90 dark:hover:bg-gray-200 transition ">
+          {adminView ? 'Manage Course' : 'View Course'}
         </Link>
       </div>
     </div>

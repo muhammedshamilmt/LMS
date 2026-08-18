@@ -1,10 +1,50 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, use } from 'react';
+import useSWR from 'swr';
 import { ChevronLeft, Mail, Phone, Calendar, MapPin, CreditCard, BookOpen, Clock, Activity, CheckCircle2, Download, Filter, X, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Image as IKImage } from "@imagekit/next";
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
+
+const apiFetcher = (url: string) => fetch(url).then(async (res) => {
+  const data = await res.json();
+  if (!res.ok || data.error) throw new Error(data.error || 'Failed to fetch data');
+  return data;
+});
+
+const ProfileSkeleton = () => (
+  <div className="w-full mx-auto space-y-6 animate-pulse">
+    {/* Header Skeleton */}
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 bg-gray-200 dark:bg-zinc-800 rounded-full"></div>
+        <div className="w-40 h-8 bg-gray-200 dark:bg-zinc-800 rounded"></div>
+      </div>
+      <div className="flex items-center gap-3">
+        <div className="w-24 h-10 bg-gray-200 dark:bg-zinc-800 rounded-full"></div>
+        <div className="w-32 h-10 bg-blue-200 dark:bg-blue-900/30 rounded-full"></div>
+      </div>
+    </div>
+    
+    {/* Profile Card Skeleton */}
+    <div className="bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/10 rounded-3xl p-8">
+      <div className="flex flex-col md:flex-row gap-8 items-start">
+        <div className="w-32 h-32 bg-gray-200 dark:bg-zinc-800 rounded-full"></div>
+        <div className="flex-1 space-y-4">
+          <div className="w-48 h-8 bg-gray-200 dark:bg-zinc-800 rounded"></div>
+          <div className="flex gap-4">
+            <div className="w-32 h-4 bg-gray-200 dark:bg-zinc-800 rounded"></div>
+            <div className="w-32 h-4 bg-gray-200 dark:bg-zinc-800 rounded"></div>
+          </div>
+          <div className="w-20 h-6 bg-gray-200 dark:bg-zinc-800 rounded-full"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 // Dummy data for a single student
 const STUDENT = {
@@ -23,12 +63,12 @@ const STUDENT = {
     avgScore: '92%'
   },
   transactions: [
-    { 
-      id: 'TXN-001', 
-      date: 'Sep 12, 2023', 
-      description: 'Advanced UI/UX Course', 
-      amount: '$149.00', 
-      status: 'Completed', 
+    {
+      id: 'TXN-001',
+      date: 'Sep 12, 2023',
+      description: 'Advanced UI/UX Course',
+      amount: '$149.00',
+      status: 'Completed',
       method: 'Credit Card (**** 4242)',
       details: {
         account: 'jenny.w@example.com',
@@ -74,13 +114,20 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-export default function StudentDetailedPage({ params }: { params: { id: string } }) {
+export default function StudentDetailedPage({ params }: { params: Promise<{ id: string }> }) {
+  const unwrappedParams = use(params);
+  
   const [activeTab, setActiveTab] = useState<'transactions' | 'activity' | 'courses'>('transactions');
   const [selectedTx, setSelectedTx] = useState<any>(null);
   const [activeSidebarTab, setActiveSidebarTab] = useState('payment_lines');
+  
+  const { data: student, error, isLoading } = useSWR(
+    unwrappedParams.id ? `/api/admin/students/${unwrappedParams.id}` : null, 
+    apiFetcher
+  );
 
-  // Ideally fetch student details based on params.id
-  const student = STUDENT;
+  if (isLoading) return <ProfileSkeleton />;
+  if (error || !student || student.error) return <div className="p-12 text-center text-red-500">Student not found.</div>;
 
   return (
     <div className="w-full  mx-auto space-y-6">
@@ -110,8 +157,12 @@ export default function StudentDetailedPage({ params }: { params: { id: string }
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/10 rounded-3xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_10px_20px_rgba(0,0,0,0.03)] dark:shadow-none flex flex-col items-center text-center">
             <Avatar className="w-28 h-28 mb-4 ring-4 ring-gray-50 dark:ring-white/5">
-              <AvatarImage src={student.avatar} />
-              <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
+              {student.avatar ? (
+                <AvatarImage asChild src={student.avatar}>
+                  <IKImage src={student.avatar} alt={student.name} width={112} height={112} />
+                </AvatarImage>
+              ) : null}
+              <AvatarFallback>{student.name?.charAt(0) || 'U'}</AvatarFallback>
             </Avatar>
             <h2 className="text-xl font-bold text-gray-900 dark:text-zinc-100">{student.name}</h2>
             <div className="mt-2 mb-4">
@@ -230,9 +281,9 @@ export default function StudentDetailedPage({ params }: { params: { id: string }
                         </tr>
                       </thead>
                       <tbody>
-                        {student.transactions.map((txn, index) => (
-                          <tr 
-                            key={txn.id} 
+                        {student.transactions.map((txn: any, index: any) => (
+                          <tr
+                            key={txn.id}
                             className="border-b border-gray-50 dark:border-white/5 last:border-0 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer group"
                             onClick={() => setSelectedTx(txn)}
                           >
@@ -258,26 +309,45 @@ export default function StudentDetailedPage({ params }: { params: { id: string }
               )}
 
               {activeTab === 'courses' && (
-                <div className="p-6 flex flex-col items-center justify-center flex-1 text-center py-20">
-                  <div className="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center mb-4 text-blue-500">
-                    <BookOpen className="w-8 h-8" />
+                <div className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {student.enrollments?.length > 0 ? student.enrollments.map((course: any) => (
+                      <div key={course.id} className="flex gap-4 p-4 rounded-2xl border border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
+                        <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-200 dark:bg-zinc-800 flex-shrink-0 relative">
+                          {course.courseThumbnail ? (
+                            <IKImage src={course.courseThumbnail} alt={course.courseTitle} fill className="object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400"><BookOpen className="w-8 h-8" /></div>
+                          )}
+                        </div>
+                        <div className="flex flex-col justify-center">
+                          <h4 className="font-semibold text-gray-900 dark:text-zinc-100 mb-1 line-clamp-1">{course.courseTitle || 'Unknown Course'}</h4>
+                          <div className="text-sm text-gray-500 mb-3">Enrolled: {course.enrolledAt}</div>
+                          <div className="w-full bg-gray-200 dark:bg-zinc-800 rounded-full h-1.5">
+                            <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: `${course.progress}%` }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    )) : (
+                      <div className="col-span-2 text-center py-12 text-gray-500">No enrolled courses found.</div>
+                    )}
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100 mb-2">Enrolled Courses</h3>
-                  <p className="text-gray-500 dark:text-zinc-400 max-w-sm">
-                    This section will display the list of courses this student is currently enrolled in or has completed.
-                  </p>
                 </div>
               )}
 
               {activeTab === 'activity' && (
-                <div className="p-6 flex flex-col items-center justify-center flex-1 text-center py-20">
-                  <div className="w-16 h-16 rounded-full bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center mb-4 text-purple-500">
-                    <Clock className="w-8 h-8" />
+                <div className="p-6">
+                  <div className="relative border-l-2 border-gray-100 dark:border-white/10 ml-3 space-y-8">
+                    {student.activityLog?.length > 0 ? student.activityLog.map((activity: any, idx: number) => (
+                      <div key={activity.id} className="relative pl-6">
+                        <div className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 border-white dark:border-[#0a0a0a] ${activity.type === 'purchase' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                        <div className="text-sm text-gray-500 dark:text-zinc-400 mb-1">{activity.date}</div>
+                        <div className="font-medium text-gray-900 dark:text-zinc-100">{activity.title}</div>
+                      </div>
+                    )) : (
+                      <div className="pl-6 text-gray-500 py-4">No recent activity.</div>
+                    )}
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100 mb-2">Activity Log</h3>
-                  <p className="text-gray-500 dark:text-zinc-400 max-w-sm">
-                    View the student's recent logins, course progress updates, and other platform interactions here.
-                  </p>
                 </div>
               )}
 

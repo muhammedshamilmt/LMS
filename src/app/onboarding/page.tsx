@@ -29,12 +29,14 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 const steps = ["graduation", "source", "nationality", "success"];
 
 export default function OnboardingPage() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const currentStep = steps[currentStepIndex];
+  const supabase = createClient();
 
   // Form State
   const [formData, setFormData] = useState({
@@ -43,8 +45,19 @@ export default function OnboardingPage() {
     nationality: "",
   });
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStepIndex < steps.length - 1) {
+      if (currentStep === "nationality") {
+        // Save to supabase
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from('users').update({
+            highest_education: formData.graduation,
+            acquisition_platform: formData.source,
+            region: formData.nationality
+          }).eq('id', user.id);
+        }
+      }
       setCurrentStepIndex(prev => prev + 1);
     }
   };
@@ -67,10 +80,11 @@ export default function OnboardingPage() {
     <div className="min-h-screen w-full bg-blue-600 gap-1 dark:bg-[#0a0a0a] p-2 flex overflow-hidden">
       {/* Left Column: Form Section */}
       <motion.div
+        layout
         initial={false}
         animate={{ width: currentStep === "success" ? "100%" : "45%" }}
-        transition={{ type: "spring", bounce: 0, duration: 0.8 }}
-        className="w-full flex flex-col bg-white justify-between rounded-3xl px-8 sm:px-16 md:px-24 py-12 relative z-10"
+        transition={{ type: "spring", bounce: 0, duration: 0.5 }}
+        className={`w-full flex flex-col bg-white justify-between rounded-3xl px-8 sm:px-16 md:px-24 py-12 relative z-10 ${currentStep === "success" ? "mx-auto" : ""}`}
       >
 
         {/* Header / Logo */}

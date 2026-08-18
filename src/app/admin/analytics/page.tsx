@@ -3,6 +3,7 @@ import { MetricCards } from "@/components/admin/MetricCards";
 import { PerformanceChart } from "@/components/admin/PerformanceChart";
 import { SalesGaugeChart } from "@/components/admin/SalesGaugeChart";
 import { RecentOrdersTable } from "@/components/admin/RecentOrdersTable";
+import { MarketingInsights } from "@/components/admin/MarketingInsights";
 import { Filter, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -100,6 +101,9 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
+
+      {/* Marketing Insights Section */}
+      <MarketingInsights />
     </div>
   );
 }

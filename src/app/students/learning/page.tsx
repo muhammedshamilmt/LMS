@@ -12,51 +12,108 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer
 } from "recharts";
-import { 
-  ChevronDown, 
-  Settings, 
-  Wallet, 
-  ArrowUpRight, 
-  Clock, 
-  CheckCircle2, 
-  Calendar,
+import {
+  ChevronDown,
+  Settings,
+  Wallet,
+  ArrowUpRight,
   ArrowDownRight,
   ArrowRightLeft,
   MoreHorizontal,
   Link as LinkIcon,
-  Edit2
+  Edit2,
+  ArrowRight,
+  BookOpen,
+  Clock,
+  Calendar,
+  CheckCircle2,
+  Activity,
+  Target,
+  Trophy,
+  Flame,
+  Search
 } from "lucide-react";
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from "@/components/ui/button";
+import useSWR from "swr";
+import { useRouter } from "next/navigation";
 
-const chartData = [
-  { day: '14 Jul', achieved: 2500, expected: -1200 },
-  { day: '', achieved: 3200, expected: -1500 },
-  { day: '', achieved: 2800, expected: -1800 },
-  { day: '', achieved: 3800, expected: -2500 },
-  { day: '', achieved: 2100, expected: -1100 },
-  { day: '', achieved: 2900, expected: -2100 },
-  { day: '', achieved: 4000, expected: -3000 },
-  { day: '21 Aug', achieved: 3500, expected: -2200 },
-  { day: '', achieved: 2800, expected: -1900 },
-  { day: '', achieved: 3100, expected: -2800 },
-  { day: '', achieved: 2500, expected: -1500 },
-  { day: '', achieved: 3600, expected: -2600 },
-  { day: '', achieved: 2900, expected: -2000 },
-  { day: '', achieved: 3200, expected: -2400 },
-  { day: '28 Sep', achieved: 2700, expected: -1800 },
-  { day: '', achieved: 3400, expected: -2700 },
-  { day: '', achieved: 2200, expected: -1200 },
-  { day: '', achieved: 2900, expected: -2100 },
-];
+
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) {
+    const error = new Error('An error occurred while fetching the data.');
+    throw error;
+  }
+  return res.json();
+};
 
 export default function LearningPage() {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const router = useRouter();
+
+  const { data, error, isLoading } = useSWR(`/api/student/dashboard`, fetcher, {
+    refreshInterval: 10000 // auto-refresh every 10 seconds
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8 animate-in fade-in">
+        {/* Header Skeleton */}
+        <div className="flex justify-between items-center bg-white dark:bg-black p-4 rounded-[40px]">
+          <Skeleton className="h-10 w-2/3 md:w-[400px] rounded-2xl" />
+        </div>
+
+        {/* Stats Grid Skeleton */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Skeleton className="h-32 rounded-3xl" />
+          <Skeleton className="h-32 rounded-3xl" />
+          <Skeleton className="h-32 rounded-3xl" />
+          <Skeleton className="h-32 rounded-3xl" />
+        </div>
+
+        {/* Content Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="col-span-2 space-y-6">
+            <Skeleton className="h-[400px] rounded-[40px]" />
+          </div>
+          <div className="space-y-6">
+            <Skeleton className="h-[200px] rounded-[40px]" />
+            <Skeleton className="h-[200px] rounded-[40px]" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="p-8 text-red-500 font-bold text-center w-full mt-20">Failed to load learning data. Ensure the database tables exist.</div>;
+  }
+
+  const enrolledCourses = data?.enrolledCourses || [];
+
+  // Calculate stats
+  const totalEnrolled = enrolledCourses.length;
+  const totalCompleted = enrolledCourses.filter((c: any) => c.progress.completed === c.progress.total && c.progress.total > 0).length;
+  const pending = totalEnrolled > 0 ? totalEnrolled - totalCompleted : 0;
+  const successRate = totalEnrolled > 0 ? ((totalCompleted / totalEnrolled) * 100).toFixed(1) : "0";
+
+  // Calculate points
+  const totalCompletedModules = enrolledCourses.reduce((sum: number, c: any) => sum + (c.progress.completed || 0), 0);
+  const ptsPerModule = 15.35;
+  const totalPoints = totalCompletedModules * ptsPerModule;
+  const pointsGoal = 25000;
+  const pointsRemaining = Math.max(0, pointsGoal - totalPoints);
+  const goalProgressPercentage = Math.min(100, Math.round((totalPoints / pointsGoal) * 100));
+
+  // Use dynamic chart data from the API, fallback to empty array
+  const chartData = data?.activityChartData || [];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white p-6 font-sans pb-24 font-medium">
       {/* Breadcrumb */}
       <div className="text-gray-500 dark:text-white/40 text-sm font-medium flex items-center gap-2 mb-6">
-        <span className="hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors">Overview</span>
+        <span className="hover:text-gray-900 dark:hover:text-white cursor-pointer transition-colors" onClick={() => router.push('/students/home')}>Overview</span>
         <span>/</span>
         <span className="text-gray-900 dark:text-white">Learning Details</span>
       </div>
@@ -83,10 +140,10 @@ export default function LearningPage() {
       {/* Stat Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         {[
-          { label: "Total Enrolled", value: "124", icon: Wallet, color: "text-emerald-600 dark:text-emerald-400" },
-          { label: "Total Completed", value: "82", icon: ArrowUpRight, color: "text-blue-600 dark:text-blue-400" },
-          { label: "Pending", value: "12", icon: Clock, color: "text-amber-600 dark:text-amber-400" },
-          { label: "Success Rate", value: "98.5%", icon: CheckCircle2, color: "text-purple-600 dark:text-purple-400" },
+          { label: "Total Enrolled", value: totalEnrolled.toString(), icon: Wallet, color: "text-emerald-600 dark:text-emerald-400" },
+          { label: "Total Completed", value: totalCompleted.toString(), icon: ArrowUpRight, color: "text-blue-600 dark:text-blue-400" },
+          { label: "Pending", value: pending.toString(), icon: Clock, color: "text-amber-600 dark:text-amber-400" },
+          { label: "Success Rate", value: `${successRate}%`, icon: CheckCircle2, color: "text-purple-600 dark:text-purple-400" },
         ].map((stat, idx) => (
           <motion.div
             key={idx}
@@ -115,7 +172,7 @@ export default function LearningPage() {
             <img src="https://flagcdn.com/w80/us.png" alt="US" className="w-10 h-7 rounded-sm object-cover border border-gray-200 dark:border-transparent" />
             <div>
               <div className="text-gray-500 dark:text-white/40 text-sm font-medium mb-1">Total points</div>
-              <div className="text-4xl font-medium text-gray-900 dark:text-white tracking-tight">3.908 <span className="text-gray-500 dark:text-white/60">PTS</span></div>
+              <div className="text-4xl font-medium text-gray-900 dark:text-white tracking-tight">{totalPoints > 0 ? (totalPoints / 1000).toFixed(3) : 0} <span className="text-gray-500 dark:text-white/60">K PTS</span></div>
               <div className="text-gray-500 dark:text-white/40 text-xs mt-2 font-medium">1 Module = 15.35 PTS, As of today</div>
             </div>
           </div>
@@ -165,16 +222,16 @@ export default function LearningPage() {
 
           <div className="mt-auto">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-gray-900 dark:text-white">Goals</span>
+              <span className="text-sm font-medium text-gray-900 dark:text-white">Goals ({pointsGoal / 1000}K PTS)</span>
               <div className="flex items-center gap-4">
-                <span className="text-xs text-gray-500 dark:text-white/40 font-medium">1092 PTS remaining</span>
+                <span className="text-xs text-gray-500 dark:text-white/40 font-medium">{pointsRemaining.toFixed(0)} PTS remaining</span>
                 <button className="text-[#3b82f6] text-xs font-medium flex items-center gap-1 hover:text-[#3b82f6]/80">
                   <Edit2 className="w-3 h-3" /> Edit
                 </button>
               </div>
             </div>
             <div className="w-full h-2 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden border border-gray-200 dark:border-transparent">
-              <div className="h-full bg-emerald-500 w-[65%] rounded-full"></div>
+              <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000" style={{ width: `${goalProgressPercentage}%` }}></div>
             </div>
           </div>
         </div>
@@ -183,7 +240,7 @@ export default function LearningPage() {
         <div className="bg-white dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-3xl p-8 flex flex-col md:flex-row gap-8">
           <div className="flex-1 flex flex-col">
             <h3 className="text-sm font-medium text-gray-900 dark:text-white leading-relaxed mb-6">
-              Looks like you are earning more than 25K PTS on last 3 weeks.
+              Looks like you are earning around {(totalPoints / 1000).toFixed(1)}K PTS on your recent courses.
             </h3>
 
             <div className="space-y-4 mb-8">
@@ -191,18 +248,18 @@ export default function LearningPage() {
                 <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-white/40 mb-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Achieved
                 </div>
-                <div className="text-xl font-medium text-gray-900 dark:text-white">35.898 <span className="text-gray-500 dark:text-white/40 text-sm">PTS</span></div>
+                <div className="text-xl font-medium text-gray-900 dark:text-white">{(totalPoints / 1000).toFixed(3)} <span className="text-gray-500 dark:text-white/40 text-sm">K PTS</span></div>
               </div>
               <div>
                 <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-white/40 mb-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-white/20"></div> Expected
                 </div>
-                <div className="text-xl font-medium text-gray-900 dark:text-white">25.093 <span className="text-gray-500 dark:text-white/40 text-sm">PTS</span></div>
+                <div className="text-xl font-medium text-gray-900 dark:text-white">25.000 <span className="text-gray-500 dark:text-white/40 text-sm">K PTS</span></div>
               </div>
             </div>
 
             <p className="text-xs font-medium text-gray-500 dark:text-white/40 mt-auto leading-relaxed">
-              Set your schedule so that you can earn about <span className="text-gray-900 dark:text-white font-medium">3.890 PTS</span> on next time period.
+              Complete your pending modules so that you can earn about <span className="text-gray-900 dark:text-white font-medium">3.890 PTS</span> more.
             </p>
           </div>
 
@@ -230,46 +287,42 @@ export default function LearningPage() {
       <div>
         <div className="flex justify-between items-center mb-6 mt-8">
           <h2 className="text-2xl font-medium tracking-tight text-gray-900 dark:text-white">Active Courses</h2>
-          <Button variant="outline" className="rounded-full font-medium bg-white dark:bg-[#111] border border-gray-200 dark:border-[#222]">View All</Button>
+          <Button variant="outline" className="rounded-full font-medium bg-white dark:bg-[#111] border border-gray-200 dark:border-[#222]" onClick={() => router.push('/students/courses')}>View All</Button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <ProgressCard
-            title="UI/UX Masterclass"
-            description="Learn the principles of UI/UX design and create stunning interfaces."
-            tasks={24}
-            projects={3}
-            progress={72}
-            tag="Design"
-            bgColor="bg-purple-50 dark:bg-purple-900/10"
-            emojiSrc="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Laptop.png"
-            actionText="Continue"
-            id="1"
-          />
-          <ProgressCard
-            title="Advanced React"
-            description="Master React hooks, context, and performance optimization."
-            tasks={18}
-            projects={2}
-            progress={45}
-            tag="Development"
-            bgColor="bg-blue-50 dark:bg-blue-900/10"
-            emojiSrc="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Rocket.png"
-            actionText="Continue"
-            id="2"
-          />
-          <ProgressCard
-            title="Data Science 101"
-            description="Introduction to data analysis, visualization, and machine learning."
-            tasks={32}
-            projects={4}
-            progress={15}
-            tag="Data"
-            bgColor="bg-emerald-50 dark:bg-emerald-900/10"
-            emojiSrc="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Bar%20Chart.png"
-            actionText="Continue"
-            id="3"
-          />
-        </div>
+
+        {enrolledCourses.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {enrolledCourses.map((course: any, i: number) => {
+              const bgColors = ["bg-purple-50 dark:bg-purple-900/10", "bg-blue-50 dark:bg-blue-900/10", "bg-emerald-50 dark:bg-emerald-900/10", "bg-amber-50 dark:bg-amber-900/10"];
+              const bgColor = bgColors[i % bgColors.length];
+              const progressPercentage = course.progress.total > 0 ? Math.round((course.progress.completed / course.progress.total) * 100) : 0;
+              return (
+                <div key={course.id} onClick={() => router.push(`/students/courses/${course.id}`)} className="cursor-pointer">
+                  <ProgressCard
+                    id={course.id}
+                    title={course.title}
+                    description={course.short_description || course.category || "Learn more about this course."}
+                    tasks={course.progress.total}
+                    projects={course.progress.completed}
+                    progress={progressPercentage}
+                    tag="Enrolled"
+                    bgColor={bgColor}
+                    emojiSrc={course.thumbnailUrl ? course.thumbnailUrl : `https://api.dicebear.com/7.x/shapes/svg?seed=${course.id}`}
+                    actionText="Continue"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center p-12 bg-white dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-3xl mt-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">No active courses</h3>
+            <p className="text-gray-500 mb-6 max-w-md mx-auto">You haven't enrolled in any courses yet. Start your learning journey today by exploring our catalog.</p>
+            <Button onClick={() => router.push('/students/courses')} className="bg-[#7956ED] hover:bg-[#6b4cda] text-white rounded-full">
+              Explore Courses
+            </Button>
+          </div>
+        )}
       </div>
 
       <style jsx global>{`

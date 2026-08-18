@@ -25,7 +25,8 @@ export function TopNavbar() {
     { name: 'Transactions', href: '/admin/transactions' },
     { name: 'Certificates', href: '/admin/certificates' },
     { name: 'Analytics', href: '/admin/analytics' },
-    { name: 'Settings', href: '/admin/settings' }
+    { name: 'Settings', href: '/admin/settings' },
+    { name: 'Queue', href: '/admin/queue' }
   ];
 
   return (
