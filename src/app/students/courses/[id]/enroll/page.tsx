@@ -2,7 +2,9 @@
 
 import React, { useState } from "react";
 import useSWR from "swr";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   ChevronRight,
   ChevronDown,
@@ -87,6 +89,15 @@ export default function CourseEnrollPage({ params }: { params: Promise<{ id: str
   const { data: courseData, error, isLoading } = useSWR(`/api/courses/${id}`, fetcher);
   const [expandedModules, setExpandedModules] = useState<number[]>([0]); // Default open first section
   const [showVideo, setShowVideo] = useState(false);
+  const router = useRouter();
+
+  const handleEnroll = () => {
+    // In a real app, you would add the course to a cart state or database here
+    toast.success("Course added to cart");
+    setTimeout(() => {
+      router.push("/students/cart");
+    }, 1000); // Small delay to let user see the toast
+  };
 
   const isDirectVideo = (url: string) => {
     if (!url) return false;
@@ -350,9 +361,9 @@ export default function CourseEnrollPage({ params }: { params: Promise<{ id: str
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 mb-12">
-              <Link href={`/students/courses/${id}`} className="flex-1 h-14 bg-[#111] hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black rounded-2xl font-sbold text-[15px] shadow-md transition-transform active:scale-95 flex items-center justify-center">
-                <PlaySquare className="w-5 h-5 mr-2" /> Enroll a course
-              </Link>
+              <button onClick={handleEnroll} className="flex-1 h-14 bg-[#111] hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black rounded-2xl font-bold text-[15px] shadow-md transition-transform active:scale-95 flex items-center justify-center cursor-pointer">
+                <PlaySquare className="w-5 h-5 mr-2" /> Add to cart
+              </button>
               <Button variant="outline" className="flex-1 h-14 border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white rounded-2xl font-bold text-[15px] hover:bg-gray-50 dark:hover:bg-zinc-800 transition-transform active:scale-95">
                 <Gift className="w-5 h-5 mr-2" /> Buy as a gift
               </Button>

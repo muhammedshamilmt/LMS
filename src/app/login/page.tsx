@@ -43,6 +43,7 @@ export default function AuthPage() {
     setLoading(true);
 
     if (isLogin) {
+      // First, check if credentials belong to admin
       const adminResult = await loginAdmin(email, password);
       if (adminResult.is_admin) {
         router.push("/admin/analytics");
@@ -50,10 +51,12 @@ export default function AuthPage() {
         return;
       }
 
+      // If not admin, attempt to log in as a student
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+
       if (error) {
         setError(error.message);
         setLoading(false);
@@ -87,20 +90,20 @@ export default function AuthPage() {
       <div className="w-full lg:w-[45%] flex flex-col justify-center px-8 sm:px-16 md:px-24 py-12">
         <div className="max-w-md w-full mx-auto">
           {/* Logo */}
-          <div className="flex items-center gap-3 mb-12">
+          <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
               <div className="w-4 h-4 border-2 border-white rounded-sm rotate-45" />
             </div>
             <div>
-              <h1 className="font-bold text-lg text-gray-900 dark:text-white leading-none">Relay App</h1>
-              <p className="text-xs text-gray-500 font-medium">Workflow Manager</p>
+              <h1 className="font-bold text-lg text-gray-900 dark:text-white leading-none">LMS Platform</h1>
+              <p className="text-xs text-gray-500 font-medium">Learning Management</p>
             </div>
           </div>
 
           {/* Heading */}
-          <div className="mb-8">
+          <div className="mb-6">
             <p className="text-sm font-medium text-gray-500 mb-1">
-              {isLogin ? "Welcome back" : "Welcome to Relay"}
+              {isLogin ? "Welcome back" : "Welcome to the LMS"}
             </p>
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
               {isLogin ? "Log in to your account" : "Create new account"}
@@ -284,10 +287,10 @@ export default function AuthPage() {
         <div className="relative z-10 w-full max-w-2xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
-              Stop losing tasks inside<br />conversations
+              Master your skills<br />with our platform
             </h2>
             <p className="text-blue-100/80 text-lg leading-relaxed max-w-md mx-auto">
-              Automatically detect action items, follow-ups, and assignments from Slack, email, meetings, and team threads — without manually creating tasks.
+              Join thousands of students learning new skills, tracking their progress, and achieving their goals.
             </p>
             {/* 3 dots */}
             <div className="flex justify-center gap-2 mt-8">

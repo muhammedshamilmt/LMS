@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co; media-src 'self' blob: https://*.supabase.co https://*.imagekit.io; frame-src 'self' https://www.youtube.com https://youtube.com;"
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://checkout.razorpay.com https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://api.razorpay.com https://checkout.stripe.com; media-src 'self' blob: https://*.supabase.co https://*.imagekit.io; frame-src 'self' https://www.youtube.com https://youtube.com https://api.razorpay.com https://checkout.stripe.com https://hooks.stripe.com;"
           }
         ]
       }

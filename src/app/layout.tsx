@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ImageKitProviderWrapper } from "@/components/ImageKitProviderWrapper";
+import { Toaster } from "sonner";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -30,6 +31,7 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
             <ImageKitProviderWrapper>
               {children}
+              <Toaster position="top-center" richColors />
             </ImageKitProviderWrapper>
           </ThemeProvider>
         </body>
