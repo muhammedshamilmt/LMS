@@ -120,7 +120,7 @@ export default function CoursePage() {
           )}
 
           {!isLoading && filteredCourses.map((course: any, idx: number) => {
-            const bgColors = ["bg-[#FFE4D6]", "bg-[#D1F2D6]", "bg-[#E2D9F3]", "bg-[#D6EFFF]", "bg-[#FDE2ED]", "bg-[#F3F4F6]"];
+            const bgColors = ["bg-[#FFE4D6] dark:bg-orange-900/20", "bg-[#D1F2D6] dark:bg-green-900/20", "bg-[#E2D9F3] dark:bg-purple-900/20", "bg-[#D6EFFF] dark:bg-blue-900/20", "bg-[#FDE2ED] dark:bg-pink-900/20", "bg-[#F3F4F6] dark:bg-zinc-800/50"];
             const bgColor = bgColors[idx % bgColors.length];
             return (
               <CourseCard

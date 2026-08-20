@@ -101,6 +101,15 @@ export function Footer() {
             </div>
 
             <div className="flex flex-col gap-5">
+              <h4 className="text-white font-semibold text-[15px]">Legal</h4>
+              <nav className="flex flex-col gap-3">
+                <Link href="/privacy-policy" className="text-sm text-gray-400 hover:text-white transition-colors">Privacy Policy</Link>
+                <Link href="/cookie-policy" className="text-sm text-gray-400 hover:text-white transition-colors">Cookie Policy</Link>
+                <Link href="/return-policy" className="text-sm text-gray-400 hover:text-white transition-colors">Return Policy</Link>
+              </nav>
+            </div>
+
+            <div className="flex flex-col gap-5">
               <h4 className="text-white font-semibold text-[15px]">Connect</h4>
               <nav className="flex flex-col gap-3">
                 <Link href="#" className="text-sm text-gray-400 hover:text-white transition-colors">Twitter</Link>

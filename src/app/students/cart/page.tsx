@@ -48,14 +48,29 @@ const INITIAL_CART = [
 ];
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState(INITIAL_CART);
+  const [cartItems, setCartItems] = useState<any[]>([]);
   const [coupon, setCoupon] = useState("");
   const [isApplying, setIsApplying] = useState(false);
   const [discount, setDiscount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "razorpay" | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const subtotal = cartItems.reduce((acc, item) => acc + item.originalPrice, 0);
+  useEffect(() => {
+    setIsMounted(true);
+    const savedCart = localStorage.getItem('lms_cart');
+    if (savedCart) {
+      try {
+        setCartItems(JSON.parse(savedCart));
+      } catch (e) {
+        setCartItems(INITIAL_CART);
+      }
+    } else {
+      setCartItems(INITIAL_CART);
+    }
+  }, []);
+
+  const subtotal = cartItems.reduce((acc, item) => acc + (item.originalPrice || item.price), 0);
   const total = cartItems.reduce((acc, item) => acc + item.price, 0) - discount;
 
   useEffect(() => {
@@ -63,14 +78,32 @@ export default function CartPage() {
     const query = new URLSearchParams(window.location.search);
     if (query.get("success")) {
       toast.success("Payment successful!");
-      setCartItems([]);
-      window.history.replaceState(null, '', window.location.pathname);
+      
+      const enrollPurchasedCourses = async () => {
+        try {
+          for (const item of cartItems) {
+            await fetch('/api/enrollments', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ courseId: item.id })
+            });
+          }
+        } catch (error) {
+          console.error("Error enrolling in courses:", error);
+        }
+      };
+
+      enrollPurchasedCourses().then(() => {
+        setCartItems([]);
+        localStorage.removeItem('lms_cart');
+        window.history.replaceState(null, '', window.location.pathname);
+      });
     }
     if (query.get("canceled")) {
       toast.error("Payment was canceled.");
       window.history.replaceState(null, '', window.location.pathname);
     }
-  }, []);
+  }, [cartItems]);
 
   const handleCheckout = async () => {
     if (!paymentMethod) return;
@@ -134,9 +167,21 @@ export default function CartPage() {
         name: "LMS Platform",
         description: "Course Enrollment Payment",
         order_id: orderData.id,
-        handler: function (response: any) {
+        handler: async function (response: any) {
           toast.success("Payment successful!");
+          try {
+            for (const item of cartItems) {
+              await fetch('/api/enrollments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courseId: item.id })
+              });
+            }
+          } catch (error) {
+            console.error("Error enrolling in courses:", error);
+          }
           setCartItems([]); // Empty cart on success
+          localStorage.removeItem('lms_cart');
         },
         prefill: {
           name: "Student Name",

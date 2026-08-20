@@ -34,18 +34,18 @@ export function CourseCard({
       {/* Top Colored Section */}
       <div className={`rounded-[24px] p-5 pb-6 relative flex flex-col flex-1 ${bgColor}`}>
         <div className="flex justify-between items-start mb-6">
-          <div className="bg-white/80 backdrop-blur-sm px-3.5 py-1.5 rounded-full text-[13px] font-semibold text-gray-800">
+          <div className="bg-white/80 dark:bg-black/40 backdrop-blur-sm px-3.5 py-1.5 rounded-full text-[13px] font-semibold text-gray-800 dark:text-gray-200">
             {topBadge}
           </div>
-          <button className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-gray-700 hover:bg-white hover:text-black transition ">
+          <button className="w-10 h-10 rounded-full bg-white/80 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-black hover:text-black dark:hover:text-white transition ">
             <Bookmark className="w-4 h-4" />
           </button>
         </div>
 
         <div className="flex justify-between items-start mb-6">
           <div className="flex-1">
-            <div className="text-[13px] font-medium text-gray-700 mb-1">{category}</div>
-            <h3 className="text-[22px] font-bold text-gray-900 leading-[1.2] max-w-[300px]">
+            <div className="text-[13px] font-medium text-gray-700 dark:text-gray-300 mb-1">{category}</div>
+            <h3 className="text-[22px] font-bold text-gray-900 dark:text-white leading-[1.2] max-w-[300px]">
               {title}
             </h3>
           </div>
@@ -62,7 +62,7 @@ export function CourseCard({
           {tags.map((tag, idx) => (
             <div
               key={idx}
-              className="px-3 py-1.5 rounded-full border border-black/10 text-gray-700 text-[12px] font-medium"
+              className="px-3 py-1.5 rounded-full border border-black/10 dark:border-white/20 text-gray-700 dark:text-gray-300 text-[12px] font-medium"
             >
               {tag}
             </div>

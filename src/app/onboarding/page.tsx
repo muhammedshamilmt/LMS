@@ -77,14 +77,14 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-blue-600 gap-1 dark:bg-[#0a0a0a] p-2 flex overflow-hidden">
+    <div className="min-h-screen w-full bg-blue-600 gap-1 dark:bg-black p-2 flex overflow-hidden">
       {/* Left Column: Form Section */}
       <motion.div
         layout
         initial={false}
         animate={{ width: currentStep === "success" ? "100%" : "45%" }}
         transition={{ type: "spring", bounce: 0, duration: 0.5 }}
-        className={`w-full flex flex-col bg-white justify-between rounded-3xl px-8 sm:px-16 md:px-24 py-12 relative z-10 ${currentStep === "success" ? "mx-auto" : ""}`}
+        className={`w-full flex flex-col bg-white dark:bg-[#0a0a0a] dark:border dark:border-white/5 justify-between rounded-3xl px-8 sm:px-16 md:px-24 py-12 relative z-10 ${currentStep === "success" ? "mx-auto" : ""}`}
       >
 
         {/* Header / Logo */}

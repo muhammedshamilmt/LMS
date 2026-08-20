@@ -40,7 +40,8 @@ export function ProfileDropdown() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push('/login');
+    router.refresh();
+    window.location.href = '/';
   };
 
   return (
@@ -131,33 +132,39 @@ export function ProfileDropdown() {
               </Link>
 
 
-              <div className="h-px bg-gray-100 dark:bg-white/5  mx-2" />
+            </div>
 
+            <div className="h-px bg-gray-100 dark:bg-white/5  mx-2" />
 
-              <div className="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl transition-colors cursor-default">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 ">Theme</span>
-                <div className="flex items-center gap-0.5 bg-gray-100 dark:bg-white/10 p-1 rounded-full">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setTheme("light"); }}
-                    className={`p-1.5 rounded-full transition-colors ${mounted && theme === "light" ? "bg-white dark:bg-zinc-800 shadow-sm text-gray-900 dark:text-white" : "text-gray-500 hover:text-gray-900 dark:hover:text-white"}`}
-                  >
-                    <Sun className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setTheme("dark"); }}
-                    className={`p-1.5 rounded-full transition-colors ${mounted && theme === "dark" ? "bg-white dark:bg-zinc-800 shadow-sm text-gray-900 dark:text-white" : "text-gray-500 hover:text-gray-900 dark:hover:text-white"}`}
-                  >
-                    <Moon className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setTheme("system"); }}
-                    className={`p-1.5 rounded-full transition-colors ${mounted && theme === "system" ? "bg-white dark:bg-zinc-800 shadow-sm text-gray-900 dark:text-white" : "text-gray-500 hover:text-gray-900 dark:hover:text-white"}`}
-                  >
-                    <Monitor className="w-3.5 h-3.5" />
-                  </button>
+            {mounted && (
+              <div className="p-2">
+                <div className="flex items-center justify-between px-3">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                    Theme
+                  </span>
+                  <div className="flex items-center bg-gray-100 dark:bg-zinc-800 p-1 rounded-full">
+                    <button
+                      onClick={() => setTheme('light')}
+                      className={`p-1.5 rounded-full transition-all ${theme === 'light' ? 'bg-white dark:bg-zinc-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
+                    >
+                      <Sun className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setTheme('dark')}
+                      className={`p-1.5 rounded-full transition-all ${theme === 'dark' ? 'bg-white dark:bg-zinc-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
+                    >
+                      <Moon className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setTheme('system')}
+                      className={`p-1.5 rounded-full transition-all ${theme === 'system' ? 'bg-white dark:bg-zinc-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
+                    >
+                      <Monitor className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div className="h-px bg-gray-100 dark:bg-white/5 my-1 mx-2" />
 
@@ -169,7 +176,7 @@ export function ProfileDropdown() {
                 </div>
               </button>
 
-              <button onClick={handleSignOut} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-white/5 rounded-xl text-left transition-colors group">
+              <button onClick={handleSignOut} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-red-400/20 rounded-xl text-left transition-colors group">
                 <div className="flex items-center gap-3">
                   <LogOut className="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-red-500 transition-colors" strokeWidth={2} />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-red-500 transition-colors">Sign out</span>

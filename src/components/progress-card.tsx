@@ -52,22 +52,22 @@ export function ProgressCard({
         <div className="relative z-10 w-[65%]">
           <Badge
             variant="secondary"
-            className="bg-black/5 hover:bg-black/10 text-black border-none px-3.5 py-1 mb-5 rounded-full font-medium text-sm"
+            className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-black dark:text-white border-none px-3.5 py-1 mb-5 rounded-full font-medium text-sm transition-colors"
           >
             {tag}
           </Badge>
 
-          <h3 className="text-[22px] font-bold mb-2 text-gray-900">{title}</h3>
-          <p className="text-[15px] text-gray-600 leading-relaxed mb-6">
+          <h3 className="text-[22px] font-bold mb-2 text-gray-900 dark:text-white">{title}</h3>
+          <p className="text-[15px] text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
             {description}
           </p>
 
-          <div className="flex items-center gap-4 text-sm font-medium text-gray-900 mb-8">
+          <div className="flex items-center gap-4 text-sm font-medium text-gray-900 dark:text-gray-200 mb-8">
             <div className="flex items-center gap-2">
               <CheckSquare className="w-4 h-4" />
               <span>{tasks} tasks</span>
             </div>
-            <span className="text-gray-400 font-bold">•</span>
+            <span className="text-gray-400 dark:text-gray-500 font-bold">•</span>
             <div className="flex items-center gap-2">
               <Briefcase className="w-4 h-4" />
               <span>{projects} projects</span>
@@ -78,22 +78,22 @@ export function ProgressCard({
         <div className="relative z-10 mt-auto flex flex-col gap-3 w-full">
           {progress !== undefined ? (
             <>
-              <div className="flex justify-between items-center text-[15px] font-medium text-gray-700">
+              <div className="flex justify-between items-center text-[15px] font-medium text-gray-700 dark:text-gray-300">
                 <span>Progress</span>
-                <span className="font-bold text-gray-900">{progress}%</span>
+                <span className="font-bold text-gray-900 dark:text-white">{progress}%</span>
               </div>
-              <div className="h-2.5 w-full bg-black/10 rounded-full overflow-hidden">
+              <div className="h-2.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-black rounded-full transition-all"
+                  className="h-full bg-black dark:bg-white rounded-full transition-all"
                   style={{ width: `${progress}%` }}
                 />
               </div>
             </>
           ) : (
             <>
-              <div className="flex items-center justify-between text-[15px] font-medium text-gray-700 mt-2">
+              <div className="flex items-center justify-between text-[15px] font-medium text-gray-700 dark:text-gray-300 mt-2">
                 <span>Start date</span>
-                <span className="font-bold text-gray-900">{startDate}</span>
+                <span className="font-bold text-gray-900 dark:text-white">{startDate}</span>
               </div>
             </>
           )}

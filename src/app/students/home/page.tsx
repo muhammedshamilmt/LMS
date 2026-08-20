@@ -133,7 +133,7 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {enrolledCourses.map((course: any, i: number) => {
-                const bgColors = ["bg-[#FDE2ED]", "bg-[#E1F2FB]", "bg-[#D1F2D6]", "bg-[#F0EAFC]"];
+                const bgColors = ["bg-[#FDE2ED] dark:bg-pink-900/20", "bg-[#E1F2FB] dark:bg-blue-900/20", "bg-[#D1F2D6] dark:bg-green-900/20", "bg-[#F0EAFC] dark:bg-purple-900/20"];
                 const bgColor = bgColors[i % bgColors.length];
                 const progressPercentage = course.progress.total > 0 ? Math.round((course.progress.completed / course.progress.total) * 100) : 0;
                 return (
@@ -167,7 +167,7 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {suggestedCourses.map((course: any, i: number) => {
-                const bgColors = ["bg-[#FDE2ED]", "bg-[#E1F2FB]", "bg-[#D1F2D6]"];
+                const bgColors = ["bg-[#FDE2ED] dark:bg-pink-900/20", "bg-[#E1F2FB] dark:bg-blue-900/20", "bg-[#D1F2D6] dark:bg-green-900/20"];
                 const bgColor = bgColors[i % bgColors.length];
                 return (
                   <CourseCard

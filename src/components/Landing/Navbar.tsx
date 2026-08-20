@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { AnimatedLink } from "@/components/ui/AnimatedButton";
+import { createClient } from "@/lib/supabase/server";
+import { ProfileDropdown } from "@/components/ProfileDropdown";
 
 const NavItem = ({ href, children }: { href: string; children: React.ReactNode }) => {
   return (
@@ -16,7 +18,10 @@ const NavItem = ({ href, children }: { href: string; children: React.ReactNode }
   );
 };
 
-export function Navbar() {
+export async function Navbar() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <header className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-6xl">
       <div className="bg-[#050505]/40 backdrop-blur-2xl border border-white/10 rounded-2xl px-6 py-3 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
@@ -42,14 +47,20 @@ export function Navbar() {
 
         {/* Action Button */}
         <div className="flex items-center gap-6">
-          <Link href="/login" className="text-[15px] font-medium text-white/80 hover:text-white transition-colors">
-            Log in
-          </Link>
-          <AnimatedLink
-            href="/start"
-            text="Get Started"
-            className="relative px-6 py-2.5 rounded-xl bg-[#0a0a0a] text-white text-[15px] font-medium border border-white/15 hover:border-blue-500/50 transition-all duration-500 group overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.5)]"
-          />
+          {user ? (
+            <ProfileDropdown />
+          ) : (
+            <>
+              <Link href="/login" className="text-[15px] font-medium text-white/80 hover:text-white transition-colors">
+                Log in
+              </Link>
+              <AnimatedLink
+                href="/start"
+                text="Get Started"
+                className="relative px-6 py-2.5 rounded-xl bg-[#0a0a0a] text-white text-[15px] font-medium border border-white/15 hover:border-blue-500/50 transition-all duration-500 group overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.5)]"
+              />
+            </>
+          )}
         </div>
 
       </div>

@@ -28,9 +28,9 @@ export default function RootLayout({
         className={`${poppins.variable} h-full antialiased`}
         suppressHydrationWarning
       >
-        <body suppressHydrationWarning className="min-h-full flex flex-col font-sans text-white bg-black transition-colors">
+        <body suppressHydrationWarning className="min-h-full flex flex-col font-sans transition-colors">
           <SilenceScriptWarning />
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={true}>
             <ImageKitProviderWrapper>
               {children}
               <Toaster position="top-center" richColors />

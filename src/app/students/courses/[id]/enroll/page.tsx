@@ -87,16 +87,34 @@ const courseModules = [
 export default function CourseEnrollPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);
   const { data: courseData, error, isLoading } = useSWR(`/api/courses/${id}`, fetcher);
+  const { data: enrollmentData } = useSWR(`/api/enrollments?courseId=${id}`, fetcher);
+  const isEnrolled = enrollmentData?.enrolled || false;
+  
   const [expandedModules, setExpandedModules] = useState<number[]>([0]); // Default open first section
   const [showVideo, setShowVideo] = useState(false);
   const router = useRouter();
 
   const handleEnroll = () => {
-    // In a real app, you would add the course to a cart state or database here
+    if (courseData) {
+      const cartItem = {
+        id: id,
+        title: courseData.title || "Premium Course",
+        author: courseData.authorName || "Platform Instructor",
+        thumbnail: courseData.thumbnailUrl ? getFullSrc(courseData.thumbnailUrl) : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSV_idILmOBQ7fSJVY1j7Kncw8M5LiQi5Uk-C5CSSyi0A&s=10",
+        rating: 4.8,
+        reviews: 126,
+        price: courseData.price || 0,
+        originalPrice: Math.round((courseData.price || 0) * 1.2),
+        lectures: (courseData?.modules || []).reduce((acc: number, mod: any) => acc + (mod.lessons?.length || 0), 0) || 38,
+        duration: "4h 30min",
+        level: "All Levels"
+      };
+      localStorage.setItem('lms_cart', JSON.stringify([cartItem]));
+    }
     toast.success("Course added to cart");
     setTimeout(() => {
       router.push("/students/cart");
-    }, 1000); // Small delay to let user see the toast
+    }, 1000);
   };
 
   const isDirectVideo = (url: string) => {
@@ -361,12 +379,20 @@ export default function CourseEnrollPage({ params }: { params: Promise<{ id: str
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 mb-12">
-              <button onClick={handleEnroll} className="flex-1 h-14 bg-[#111] hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black rounded-2xl font-bold text-[15px] shadow-md transition-transform active:scale-95 flex items-center justify-center cursor-pointer">
-                <PlaySquare className="w-5 h-5 mr-2" /> Add to cart
-              </button>
-              <Button variant="outline" className="flex-1 h-14 border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white rounded-2xl font-bold text-[15px] hover:bg-gray-50 dark:hover:bg-zinc-800 transition-transform active:scale-95">
-                <Gift className="w-5 h-5 mr-2" /> Buy as a gift
-              </Button>
+              {isEnrolled ? (
+                <button onClick={() => router.push(`/students/courses/${id}`)} className="flex-1 h-14 bg-[#7956ED] hover:bg-[#6842df] text-white rounded-2xl font-bold text-[15px] shadow-md transition-transform active:scale-95 flex items-center justify-center cursor-pointer">
+                  <PlaySquare className="w-5 h-5 mr-2" /> Watch now
+                </button>
+              ) : (
+                <>
+                  <button onClick={handleEnroll} className="flex-1 h-14 bg-[#111] hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black rounded-2xl font-bold text-[15px] shadow-md transition-transform active:scale-95 flex items-center justify-center cursor-pointer">
+                    <PlaySquare className="w-5 h-5 mr-2" /> Add to cart
+                  </button>
+                  <Button variant="outline" className="flex-1 h-14 border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white rounded-2xl font-bold text-[15px] hover:bg-gray-50 dark:hover:bg-zinc-800 transition-transform active:scale-95">
+                    <Gift className="w-5 h-5 mr-2" /> Buy as a gift
+                  </Button>
+                </>
+              )}
             </div>
 
 

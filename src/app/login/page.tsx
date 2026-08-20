@@ -253,7 +253,7 @@ export default function AuthPage() {
                   </div>
                 </div>
                 <span className="text-xs text-gray-500 dark:text-zinc-400 font-medium leading-relaxed">
-                  I agree to the <a href="#" className="text-gray-900 dark:text-white font-semibold underline decoration-gray-300 underline-offset-2">Terms & Conditions</a> and <a href="#" className="text-gray-900 dark:text-white font-semibold underline decoration-gray-300 underline-offset-2">Privacy Policy</a>.
+                  I agree to the <Link href="/return-policy" className="text-gray-900 dark:text-white font-semibold underline decoration-gray-300 underline-offset-2">Terms & Conditions</Link> and <Link href="/privacy-policy" className="text-gray-900 dark:text-white font-semibold underline decoration-gray-300 underline-offset-2">Privacy Policy</Link>.
                 </span>
               </label>
             )}

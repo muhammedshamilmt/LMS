@@ -158,6 +158,25 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
   const [isCompleting, setIsCompleting] = useState(false);
 
   const handleEnroll = async () => {
+    if (courseData?.price > 0) {
+      const cartItem = {
+        id: id,
+        title: courseData.title || "Premium Course",
+        author: courseData.authorName || "Platform Instructor",
+        thumbnail: courseData.thumbnailUrl ? getFullSrc(courseData.thumbnailUrl) : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSV_idILmOBQ7fSJVY1j7Kncw8M5LiQi5Uk-C5CSSyi0A&s=10",
+        rating: 4.8,
+        reviews: 126,
+        price: courseData.price,
+        originalPrice: Math.round(courseData.price * 1.2),
+        lectures: (courseData?.modules || []).reduce((acc: number, mod: any) => acc + (mod.lessons?.length || 0), 0) || 38,
+        duration: "4h 30min",
+        level: "All Levels"
+      };
+      localStorage.setItem('lms_cart', JSON.stringify([cartItem]));
+      window.location.href = '/students/cart';
+      return;
+    }
+
     mutateEnrollment({ enrolled: true }, false);
     await fetch('/api/enrollments', {
       method: 'POST',
