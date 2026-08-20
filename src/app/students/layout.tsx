@@ -14,9 +14,10 @@ import {
   Award,
   Settings
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StreakDropdown } from "@/components/StreakDropdown";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ProfileDropdown } from "@/components/ProfileDropdown";
+import { NotificationDropdown } from "@/components/NotificationDropdown";
 
 const navItems = [
   { name: "Home", icon: Home, href: "/students/home" },
@@ -73,19 +74,9 @@ export default function StudentsLayout({
           <div className="flex items-center gap-6">
             <StreakDropdown />
 
-            <ThemeToggle />
+            <NotificationDropdown />
 
-            <div className="relative cursor-pointer text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors">
-              <Bell className="w-6 h-6" />
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-black dark:bg-white text-[9px] font-bold text-white dark:text-black border-2 border-white dark:border-zinc-950">
-                6
-              </span>
-            </div>
-
-            <Avatar className="w-10 h-10 cursor-pointer">
-              <AvatarImage src="https://i.pravatar.cc/150?img=11" alt="User" />
-              <AvatarFallback>U</AvatarFallback>
-            </Avatar>
+            <ProfileDropdown />
           </div>
         </header>
 

@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ImageKitProviderWrapper } from "@/components/ImageKitProviderWrapper";
 import { Toaster } from "sonner";
+import { SilenceScriptWarning } from "@/components/SilenceScriptWarning";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -27,8 +28,9 @@ export default function RootLayout({
         className={`${poppins.variable} h-full antialiased`}
         suppressHydrationWarning
       >
-        <body suppressHydrationWarning className="min-h-full flex flex-col font-sans text-gray-900 bg-white dark:bg-black dark:text-gray-100 transition-colors">
-          <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <body suppressHydrationWarning className="min-h-full flex flex-col font-sans text-white bg-black transition-colors">
+          <SilenceScriptWarning />
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             <ImageKitProviderWrapper>
               {children}
               <Toaster position="top-center" richColors />

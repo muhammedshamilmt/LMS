@@ -1,6 +1,10 @@
-import React from 'react';
+"use client";
+
+import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Download, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ProfileDropdown } from '@/components/ProfileDropdown';
+import { NotificationDropdown } from '@/components/NotificationDropdown';
 
 export function DashboardHeader() {
   return (
@@ -15,14 +19,17 @@ export function DashboardHeader() {
           This Month
           <ChevronDown className="w-4 h-4 text-gray-400 dark:text-gray-500" />
         </Button>
-        <Button variant="outline" className="gap-2 text-gray-600 dark:text-gray-300 rounded-full border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800">
+        <Button variant="outline" className="gap-2 text-gray-600 dark:text-gray-300 rounded-full border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 hidden md:flex">
           <Download className="w-4 h-4" />
           Export
         </Button>
-        <Button className="gap-2 text-white bg-blue-500 rounded-full hover:bg-blue-600 border-0 dark:text-white">
+        <Button className="gap-2 text-white bg-blue-500 rounded-full hover:bg-blue-600 border-0 dark:text-white hidden md:flex">
           <Filter className="w-4 h-4" />
           Filter
         </Button>
+
+        <NotificationDropdown />
+        <ProfileDropdown />
       </div>
     </div>
   );
